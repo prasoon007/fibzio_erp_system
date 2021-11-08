@@ -11,7 +11,11 @@ const CourseSchema = mongoose.Schema({
         start_date: Date,
         end_date: Date
     },
-    students_count: String
+    students_count: String,
+    students: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'student'
+    }]
 })
 
 mongoose.exports = mongoose.model('course', CourseSchema);
