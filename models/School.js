@@ -8,3 +8,5 @@ const SchoolSchema = mongoose.Schema({
         ref: 'course'
     }]
 })
+
+module.exports = mongoose.model('school', SchoolSchema);
