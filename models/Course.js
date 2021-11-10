@@ -1,8 +1,14 @@
 const mongoose = require('mongoose');
 
 const CourseSchema = mongoose.Schema({
-    course_name: String,
-    course_id: String,
+    course_name: {
+        type: String,
+        unique: true
+    },
+    course_code: {
+        type: String,
+        unique: true
+    },
     fee: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'fee'

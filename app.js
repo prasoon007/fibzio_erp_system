@@ -18,6 +18,13 @@ app.post('/', async (req, res) => {
 
 
 // School Routes
+app.get('/fetchSchools', (req, res) => {
+    schools.find({}).populate('course').exec((err, allSchool) => {
+        err ? res.send(err) :
+            res.send(allSchool);
+    });
+});
+
 app.post('/addSchool', async (req, res) => {
     const { school_name, school_code } = req.body;
     const school = await schools.create({ school_name, school_code });
@@ -26,17 +33,38 @@ app.post('/addSchool', async (req, res) => {
 
 
 // Course Routes
-app.post('/addSchool/addCourse/:id', async (req, res) => {
-    const {course_name, course_id, students_count} = req.body;
-    schools.findById(req.params.id, (err, foundSchool) => {
-        err ? res.send(err): 
-        courses.create({course_name, course_id, students_count}, (err, addedCourse) => {
-            foundSchool.course.push(addedCourse);
-            foundSchool.save();
-            res.send(foundSchool);
-        })
+app.get('/fetchAllCourse/:schoolId', (req, res) => {
+    schools.findById(req.params.schoolId).populate('course').exec((err, foundSchool) => {
+        err ? res.send(err) :
+            res.send(foundSchool.course);
+    });
+})
+
+app.post('/addCourse/:schoolId', async (req, res) => {
+    const { course_name, course_code, students_count } = req.body;
+    schools.findById(req.params.schoolId, (err, foundSchool) => {
+        err ? res.send(err) :
+            courses.create({ course_name, course_code, students_count }, (err, addedCourse) => {
+                err ? res.send(err) :
+                    foundSchool.course.push(addedCourse);
+                foundSchool.save();
+                res.send(addedCourse);
+            })
     })
 })
+
+//Student Routes
+app.post('/addStudents/:courseId', async (req, res) => {
+    const { name, email, password, course_code, dob, address, phone_number, student_status, fee_status, parent } = req.body;
+    course.findById(req.params.courseId, (err, foundCourse) => {
+        err ? res.send(err) :
+            students.create({ name, email, password, course_code, dob, address, phone_number, student_status, fee_status, parent }, (err, addedStudent) => {
+                err ? res.send(err) :
+                    foundCourse.students.push(addedStudent);
+                    foundCourse.sa
+            });
+    })
+});
 
 app.listen(5000, () => {
     console.log('Started Successfully');

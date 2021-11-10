@@ -11,14 +11,10 @@ const StudentSchema = mongoose.Schema({
     }, 
     password: {
         type: String,
+        required: true
     },
-    course: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'course'
-    },
-    dob: {
-        type: Date
-    },
+    course_code: String,
+    dob: Date,
     address: [{
         type: String,
         required: true
