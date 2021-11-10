@@ -10,12 +10,6 @@ connectToMongoDb();
 app.use(cors());
 app.use(express.json());
 
-app.post('/', async (req, res) => {
-    const { name, email, password, course, dob, address, phone_number, student_status } = req.body;
-    const student = await students.create({ name, email, password, address, phone_number, student_status });
-    res.send('hi');
-})
-
 
 // School Routes
 app.get('/fetchSchools', (req, res) => {
@@ -26,13 +20,15 @@ app.get('/fetchSchools', (req, res) => {
 });
 
 app.post('/addSchool', async (req, res) => {
-    const { school_name, school_code } = req.body;
-    const school = await schools.create({ school_name, school_code });
+    const { school_name, username, password, school_code } = req.body;
+    const school = await schools.create({ school_name, username, password, school_code });
     res.send(school);
 })
 
 
 // Course Routes
+
+//fetch
 app.get('/fetchAllCourse/:schoolId', (req, res) => {
     schools.findById(req.params.schoolId).populate('course').exec((err, foundSchool) => {
         err ? res.send(err) :
@@ -40,13 +36,15 @@ app.get('/fetchAllCourse/:schoolId', (req, res) => {
     });
 })
 
+//create
 app.post('/addCourse/:schoolId', async (req, res) => {
-    const { course_name, course_code, students_count } = req.body;
+    const { course_name, course_code, date, students_count } = req.body;
     schools.findById(req.params.schoolId, (err, foundSchool) => {
         err ? res.send(err) :
-            courses.create({ course_name, course_code, students_count }, (err, addedCourse) => {
+            courses.create({ course_name, course_code, date, students_count }, (err, addedCourse) => {
                 err ? res.send(err) :
-                    foundSchool.course.push(addedCourse);
+                    addedCourse.school_id = req.params.schoolId;
+                foundSchool.course.push(addedCourse);
                 foundSchool.save();
                 res.send(addedCourse);
             })
@@ -54,17 +52,43 @@ app.post('/addCourse/:schoolId', async (req, res) => {
 })
 
 //Student Routes
-app.post('/addStudents/:courseId', async (req, res) => {
+
+//fetch 
+app.get('/fetchStudents/:courseId', (req, res) => {
+    courses.findByIdAndUpdate(req.params.courseId).populate('students').exec((err, foundStudents) => {
+        err ? res.send(err) :
+            res.send(foundStudents);
+    })
+});
+
+//create
+app.post('/addStudents/:courseId', (req, res) => {
     const { name, email, password, course_code, dob, address, phone_number, student_status, fee_status, parent } = req.body;
-    course.findById(req.params.courseId, (err, foundCourse) => {
+    courses.findById(req.params.courseId, (err, foundCourse) => {
         err ? res.send(err) :
             students.create({ name, email, password, course_code, dob, address, phone_number, student_status, fee_status, parent }, (err, addedStudent) => {
                 err ? res.send(err) :
-                    foundCourse.students.push(addedStudent);
-                    foundCourse.sa
+                    addedStudent.course_id = req.params.courseId;
+                foundCourse.students.push(addedStudent);
+                foundCourse.save();
+                res.send(addedStudent);
             });
     })
 });
+
+//update
+app.put('/updateStudent/:studentId', async (req, res) => {
+    let updatedStudent = await students.findByIdAndUpdate(req.params.studentId, req.body);
+    updatedStudent ? res.send(updatedStudent) : res.send('No matching students with your details')
+})
+
+//delete
+app.delete('/deleteStudent/:courseId/:studentId', async (req, res) => {
+    await students.findByIdAndDelete(req.params.studentId);
+    let response = await courses.findByIdAndUpdate(req.params.courseId, { $pull: { students: req.params.studentId } });
+    res.send(response);
+});
+
 
 app.listen(5000, () => {
     console.log('Started Successfully');

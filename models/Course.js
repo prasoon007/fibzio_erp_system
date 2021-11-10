@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const CourseSchema = mongoose.Schema({
+    school_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'school'
+    },
     course_name: {
         type: String,
         unique: true
@@ -8,6 +12,9 @@ const CourseSchema = mongoose.Schema({
     course_code: {
         type: String,
         unique: true
+    },
+    school_code: {
+        type: String,
     },
     fee: {
         type: mongoose.Schema.Types.ObjectId,
