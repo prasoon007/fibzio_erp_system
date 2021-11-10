@@ -13,80 +13,108 @@ app.use(express.json());
 
 // School Routes
 app.get('/fetchSchools', (req, res) => {
-    schools.find({}).populate('course').exec((err, allSchool) => {
-        err ? res.send(err) :
-            res.send(allSchool);
-    });
+    try {
+        schools.find({}).populate('course').exec((error, allSchool) => {
+            error ? res.send(error) :
+                res.send(allSchool);
+        });
+    } catch (error) {
+        res.status(500).send('some error occured,' + error.message);
+    }
 });
 
 app.post('/addSchool', async (req, res) => {
-    const { school_name, username, password, school_code } = req.body;
-    const school = await schools.create({ school_name, username, password, school_code });
-    res.send(school);
+    try {
+        const school = await schools.create(req.body);
+        res.send(school);
+    } catch (error) {
+        res.status(500).send('some error occured,' + error.message);
+    }
 })
-
 
 // Course Routes
 
 //fetch
 app.get('/fetchAllCourse/:schoolId', (req, res) => {
-    schools.findById(req.params.schoolId).populate('course').exec((err, foundSchool) => {
-        err ? res.send(err) :
-            res.send(foundSchool.course);
-    });
+    try {
+        schools.findById(req.params.schoolId).populate('course').exec((error, foundSchool) => {
+            error ? res.send(error) :
+                res.send(foundSchool.course);
+        });
+    } catch (error) {
+        res.status(500).send('some error occured,' + error.message);
+    }
 })
 
 //create
 app.post('/addCourse/:schoolId', async (req, res) => {
-    const { course_name, course_code, date, students_count } = req.body;
-    schools.findById(req.params.schoolId, (err, foundSchool) => {
-        err ? res.send(err) :
-            courses.create({ course_name, course_code, date, students_count }, (err, addedCourse) => {
-                err ? res.send(err) :
-                    addedCourse.school_id = req.params.schoolId;
-                foundSchool.course.push(addedCourse);
-                foundSchool.save();
-                res.send(addedCourse);
-            })
-    })
+    try {
+        schools.findById(req.params.schoolId, (error, foundSchool) => {
+            error ? res.send(error) :
+                courses.create(req.body, (error, addedCourse) => {
+                    error ? res.send(error) :
+                        addedCourse.school_id = req.params.schoolId;
+                    foundSchool.course.push(addedCourse);
+                    foundSchool.save();
+                    res.send(addedCourse);
+                })
+        })
+    } catch (error) {
+        res.status(500).send('some error occured,' + error.message);
+    }
 })
 
 //Student Routes
 
 //fetch 
 app.get('/fetchStudents/:courseId', (req, res) => {
-    courses.findByIdAndUpdate(req.params.courseId).populate('students').exec((err, foundStudents) => {
-        err ? res.send(err) :
-            res.send(foundStudents);
-    })
+    try {
+        courses.findByIdAndUpdate(req.params.courseId).populate('students').exec((error, foundStudents) => {
+            error ? res.send(error) :
+                res.send(foundStudents);
+        })
+    } catch (error) {
+        res.status(500).send('some error occured,' + error.message);
+    }
 });
 
 //create
 app.post('/addStudents/:courseId', (req, res) => {
-    const { name, email, password, course_code, dob, address, phone_number, student_status, fee_status, parent } = req.body;
-    courses.findById(req.params.courseId, (err, foundCourse) => {
-        err ? res.send(err) :
-            students.create({ name, email, password, course_code, dob, address, phone_number, student_status, fee_status, parent }, (err, addedStudent) => {
-                err ? res.send(err) :
-                    addedStudent.course_id = req.params.courseId;
-                foundCourse.students.push(addedStudent);
-                foundCourse.save();
-                res.send(addedStudent);
-            });
-    })
+    try {
+        courses.findById(req.params.courseId, (error, foundCourse) => {
+            error ? res.send(error) :
+                students.create(req.body, (error, addedStudent) => {
+                    error ? res.send(error) :
+                        addedStudent.course_id = req.params.courseId;
+                    foundCourse.students.push(addedStudent);
+                    foundCourse.save();
+                    res.send(addedStudent);
+                });
+        })
+    } catch (error) {
+        res.status(500).send('some error occured,' + error.message);
+    }
 });
 
 //update
 app.put('/updateStudent/:studentId', async (req, res) => {
-    let updatedStudent = await students.findByIdAndUpdate(req.params.studentId, req.body);
-    updatedStudent ? res.send(updatedStudent) : res.send('No matching students with your details')
+    try {
+        let updatedStudent = await students.findByIdAndUpdate(req.params.studentId, req.body);
+        updatedStudent ? res.send(updatedStudent) : res.send('No matching students with your details')
+    } catch (error) {
+        res.status(500).send('some error occured,' + error.message);
+    }
 })
 
 //delete
 app.delete('/deleteStudent/:courseId/:studentId', async (req, res) => {
-    await students.findByIdAndDelete(req.params.studentId);
-    let response = await courses.findByIdAndUpdate(req.params.courseId, { $pull: { students: req.params.studentId } });
-    res.send(response);
+    try {
+        await students.findByIdAndDelete(req.params.studentId);
+        let response = await courses.findByIdAndUpdate(req.params.courseId, { $pull: { students: req.params.studentId } });
+        res.send(response);
+    } catch (error) {
+        res.status(500).send('some error occured,' + error.message);
+    }
 });
 
 
