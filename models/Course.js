@@ -7,11 +7,9 @@ const CourseSchema = mongoose.Schema({
     },
     course_name: {
         type: String,
-        unique: true
     },
     course_code: {
         type: String,
-        unique: true
     },
     school_code: {
         type: String,

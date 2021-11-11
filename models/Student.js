@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const StudentSchema = mongoose.Schema({
-    course_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'course'
-    },
     name: {
         type: String,
         required: true
@@ -16,6 +12,10 @@ const StudentSchema = mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    course_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'course'
     },
     course_code: String,
     dob: Date,

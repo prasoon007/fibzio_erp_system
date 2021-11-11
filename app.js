@@ -69,9 +69,9 @@ app.post('/addCourse/:schoolId', async (req, res) => {
 //fetch 
 app.get('/fetchStudents/:courseId', (req, res) => {
     try {
-        courses.findByIdAndUpdate(req.params.courseId).populate('students').exec((error, foundStudents) => {
+        courses.findById(req.params.courseId).populate('students').exec((error, foundCourse) => {
             error ? res.send(error) :
-                res.send(foundStudents);
+                res.send(foundCourse.students);
         })
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
@@ -86,9 +86,10 @@ app.post('/addStudents/:courseId', (req, res) => {
                 students.create(req.body, (error, addedStudent) => {
                     error ? res.send(error) :
                         addedStudent.course_id = req.params.courseId;
-                    foundCourse.students.push(addedStudent);
-                    foundCourse.save();
-                    res.send(addedStudent);
+                        addedStudent.save();
+                        foundCourse.students.push(addedStudent);
+                        foundCourse.save();
+                        res.send(addedStudent);
                 });
         })
     } catch (error) {
@@ -99,7 +100,7 @@ app.post('/addStudents/:courseId', (req, res) => {
 //update
 app.put('/updateStudent/:studentId', async (req, res) => {
     try {
-        let updatedStudent = await students.findByIdAndUpdate(req.params.studentId, req.body);
+        const updatedStudent = await students.findByIdAndUpdate(req.params.studentId, req.body);
         updatedStudent ? res.send(updatedStudent) : res.send('No matching students with your details')
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
@@ -111,7 +112,7 @@ app.delete('/deleteStudent/:courseId/:studentId', async (req, res) => {
     try {
         await students.findByIdAndDelete(req.params.studentId);
         let response = await courses.findByIdAndUpdate(req.params.courseId, { $pull: { students: req.params.studentId } });
-        res.send(response);
+        res.send("DELETED SUCCESSFULLY");
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
