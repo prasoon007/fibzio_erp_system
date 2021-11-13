@@ -5,6 +5,10 @@ const CourseSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'school'
     },
+    fee: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'fee'
+    }],
     course_name: {
         type: String,
     },
@@ -13,10 +17,6 @@ const CourseSchema = mongoose.Schema({
     },
     school_code: {
         type: String,
-    },
-    fee: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'fee'
     },
     date: {
         start_date: Date,
