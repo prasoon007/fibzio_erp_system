@@ -59,10 +59,12 @@ app.put("/updateSchool/:schoolId", async (req, res) => {
 });
 
 //delete school route
-app.delete("/fetchSchool/:schoolId", async (req, res) => {
+app.delete("/deleteSchool/:schoolId", async (req, res) => {
     try {
-        const deletedSchool = await schools.findByIdAndDelete(req.params.schoolId).populate('course');
-        console.log(deletedSchool)
+        const deletedSchool = await schools.findById(req.params.schoolId).populate('course');
+        if(!deletedSchool)res.send('Invalid Request');
+        const students = await courses.find({_id: {$in: deletedSchool.course}}, ['students']);
+        console.log(students);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
@@ -92,17 +94,15 @@ app.get('/fetchAllCourse/:schoolId', (req, res) => {
 //create
 app.post('/addCourse/:schoolId', async (req, res) => {
     try {
-        schools.findById(req.params.schoolId, (error, foundSchool) => {
-            error ? res.send(error) :
-                courses.create(req.body, (error, addedCourse) => {
-                    error ? res.send(error) :
-                        addedCourse.school_id = req.params.schoolId;
-                    addedCourse.save();
-                    foundSchool.course.push(addedCourse);
-                    foundSchool.save();
-                    res.send(addedCourse);
-                })
-        })
+        const foundSchool = await schools.findById(req.params.schoolId);
+        if(!foundSchool)res.send("Invalid Request");
+        const addedCourse = await courses.create(req.body);
+        if(!addedCourse)res.send("Invalid Request");
+        addedCourse.school_id = req.params.schoolId;
+        addedCourse.save();
+        foundSchool.course.push(addedCourse);
+        foundSchool.save();
+        res.send(addedCourse);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
@@ -133,6 +133,12 @@ app.delete('/deleteCourse/:courseId', async (req, res) => {
 
 //STUDENT ROUTE
 
+//fetch by ROLL NO
+app.get('/fetchStudents_RR/:studentId', async (req, res) => {
+    const foundStudent = await students.findById(req.params.studentId);
+    if(!foundStudent)res.send('Invalid Request');
+    res.send(foundStudent);
+})
 //fetch 
 app.get('/fetchStudents/:courseId', (req, res) => {
     try {
@@ -146,19 +152,17 @@ app.get('/fetchStudents/:courseId', (req, res) => {
 });
 
 //create
-app.post('/addStudents/:courseId', (req, res) => {
+app.post('/addStudents/:courseId', async (req, res) => {
     try {
-        courses.findById(req.params.courseId, (error, foundCourse) => {
-            error ? res.send(error) :
-                students.create(req.body, (error, addedStudent) => {
-                    error ? res.send(error) :
-                        addedStudent.course_id = req.params.courseId;
-                    addedStudent.save();
-                    foundCourse.students.push(addedStudent);
-                    foundCourse.save();
-                    res.send(addedStudent);
-                });
-        })
+        const foundCourse = await courses.findById(req.params.courseId);
+        if(!foundCourse) res.send("Invalid Request");
+        const addedStudent = await students.create(req.body);
+        if(!addedStudent) res.send('Invalid Request');
+        addedStudent.course_id = req.params.courseId;
+        addedStudent.save();
+        foundCourse.students.push(addedStudent);
+        foundCourse.save();
+        res.send(addedStudent);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
