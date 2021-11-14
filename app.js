@@ -16,12 +16,11 @@ app.use(express.json());
 // School Routes
 
 //fetch all schools
-app.get('/fetchSchools', (req, res) => {
+app.get('/fetchSchools', async (req, res) => {
     try {
-        schools.find({}).populate('course').exec((error, allSchool) => {
-            error ? res.send(error) :
-                res.send(allSchool);
-        });
+        const allSchools = await schools.find({});
+        if (!allSchools) return res.send('Invalid Request');
+        res.send(allSchools);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
@@ -31,18 +30,21 @@ app.get('/fetchSchools', (req, res) => {
 //fetch specific school
 app.get('/fetchSchool/:schoolId', async (req, res) => {
     try {
-        const foundSchool = await schools.findById(req.params.schoolId).populate('course');
-        foundSchool ? res.send(foundSchool) : res.send("Invalid School Code");
+        const foundSchool = await schools.findById(req.params.schoolId);
+        if (!foundSchool) return res.send('Invalid Request');
+        res.send(foundSchool);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
+
 })
 
 //create school route
 app.post('/addSchool', async (req, res) => {
     try {
-        const school = await schools.create(req.body);
-        res.send(school);
+        const createdSchool = await schools.create(req.body);
+        if (!createdSchool) return res.send('Invalid Request');
+        res.send(createdSchool);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
@@ -51,41 +53,34 @@ app.post('/addSchool', async (req, res) => {
 //update school route
 app.put("/updateSchool/:schoolId", async (req, res) => {
     try {
-        const foundSchool = await schools.findByIdAndUpdate(req.params.schoolId, req.body, {new:true}).populate('course');
-        foundSchool ? res.send(foundSchool) : res.send("Invalid School Code");
+        const foundSchool = await schools.findByIdAndUpdate(req.params.schoolId, req.body, { new: true }).select("-course");
+        if (!foundSchool) return res.send('Invalid Request');
+        res.send(foundSchool);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
 });
 
-//delete school route
-app.delete("/deleteSchool/:schoolId", async (req, res) => {
-    try {
-        const deletedSchool = await schools.findById(req.params.schoolId).populate('course');
-        if(!deletedSchool)res.send('Invalid Request');
-        const students = await courses.find({_id: {$in: deletedSchool.course}}, ['students']);
-        console.log(students);
-    } catch (error) {
-        res.status(500).send('some error occured,' + error.message);
-    }
-})
-
-// if(!deletedSchool)res.send('Invalid Request');
-// const deleteCourse = await courses.deleteMany({_id: {$in: deletedSchool.course}});
-// console.log(deleteCourse);
-// const removedStudents = await students.deleteMany({_id: {$in: deletedSchool.course.students}});
-// if(!removedStudents)res.send('Invalid Request');
-// console.log(removedStudents);
+// //delete school route
+// app.delete("/deleteSchool/:schoolId", async (req, res) => {
+//     try {
+//         const deletedSchool = await schools.findById(req.params.schoolId).populate('course');
+//         if (!deletedSchool) res.send('Invalid Request');
+//         const students = await courses.find({ _id: { $in: deletedSchool.course } }, ['students']);
+//         console.log(students);
+//     } catch (error) {
+//         res.status(500).send('some error occured,' + error.message);
+//     }
+// })
 
 // COURSE ROUTE
 
 //fetch
-app.get('/fetchAllCourse/:schoolId', (req, res) => {
+app.get('/fetchAllCourse/:schoolId', async (req, res) => {
     try {
-        schools.findById(req.params.schoolId).populate('course').exec((error, foundSchool) => {
-            error ? res.send(error) :
-                res.send(foundSchool.course);
-        });
+        const foundSchool = schools.findById(req.params.schoolId).populate('course');
+        if (!foundSchool) return res.send('Invalid Request');
+        res.send(foundSchool.course);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
@@ -95,9 +90,9 @@ app.get('/fetchAllCourse/:schoolId', (req, res) => {
 app.post('/addCourse/:schoolId', async (req, res) => {
     try {
         const foundSchool = await schools.findById(req.params.schoolId);
-        if(!foundSchool)res.send("Invalid Request");
+        if (!foundSchool) return res.send("Invalid Request");
         const addedCourse = await courses.create(req.body);
-        if(!addedCourse)res.send("Invalid Request");
+        if (!addedCourse) return res.send("Invalid Request");
         addedCourse.school_id = req.params.schoolId;
         addedCourse.save();
         foundSchool.course.push(addedCourse);
@@ -111,9 +106,9 @@ app.post('/addCourse/:schoolId', async (req, res) => {
 //update 
 app.put('/updateCourse/:courseId', async (req, res) => {
     try {
-        const updatedCourse = await courses.findByIdAndUpdate(req.params.courseId, req.body, {new:true});
-        (!updatedCourse) ? res.send('Invalid Request') :
-            res.send(updatedCourse);
+        const updatedCourse = await courses.findByIdAndUpdate(req.params.courseId, req.body, { new: true });
+        if (!updatedCourse) return res.send('Invalid Request');
+        res.send(updatedCourse);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
@@ -123,7 +118,7 @@ app.put('/updateCourse/:courseId', async (req, res) => {
 app.delete('/deleteCourse/:courseId', async (req, res) => {
     try {
         const deletedCourse = await courses.findByIdAndDelete(req.params.courseId);
-        if (!deletedCourse) res.send('Invalid Request');
+        if (!deletedCourse) return res.send('Invalid Request');
         students.deleteMany({ _id: { $in: deletedCourse.students } });
 
     } catch (error) {
@@ -135,17 +130,16 @@ app.delete('/deleteCourse/:courseId', async (req, res) => {
 
 //fetch by ROLL NO
 app.get('/fetchStudents_RR/:studentId', async (req, res) => {
-    const foundStudent = await students.findById(req.params.studentId);
-    if(!foundStudent)res.send('Invalid Request');
+    const foundStudent = await students.findById(req.params.studentId).select('name fee_status roll_number course_code');
+    if (!foundStudent) return res.send('Invalid Request');
     res.send(foundStudent);
 })
 //fetch 
-app.get('/fetchStudents/:courseId', (req, res) => {
+app.get('/fetchStudents/:courseId', async (req, res) => {
     try {
-        courses.findById(req.params.courseId).populate('students').exec((error, foundCourse) => {
-            error ? res.send(error) :
-                res.send(foundCourse.students);
-        })
+        const foundCourse = await courses.findById(req.params.courseId).populate('students');
+        if (!foundCourse) return res.send('Invalid Request');
+        res.send(foundCourse.students);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
@@ -155,9 +149,9 @@ app.get('/fetchStudents/:courseId', (req, res) => {
 app.post('/addStudents/:courseId', async (req, res) => {
     try {
         const foundCourse = await courses.findById(req.params.courseId);
-        if(!foundCourse) res.send("Invalid Request");
+        if (!foundCourse) return res.send("Invalid Request");
         const addedStudent = await students.create(req.body);
-        if(!addedStudent) res.send('Invalid Request');
+        if (!addedStudent) return res.send('Invalid Request');
         addedStudent.course_id = req.params.courseId;
         addedStudent.save();
         foundCourse.students.push(addedStudent);
@@ -171,8 +165,9 @@ app.post('/addStudents/:courseId', async (req, res) => {
 //update
 app.put('/updateStudent/:studentId', async (req, res) => {
     try {
-        const updatedStudent = await students.findByIdAndUpdate(req.params.studentId, req.body, {new:true});
-        updatedStudent ? res.send(updatedStudent) : res.send('No matching students with your details')
+        const updatedStudent = await students.findByIdAndUpdate(req.params.studentId, req.body, { new: true });
+        if (!updatedStudent) return res.send('Invalid Request');
+        res.send(updatedStudent);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
@@ -181,9 +176,10 @@ app.put('/updateStudent/:studentId', async (req, res) => {
 //delete
 app.delete('/deleteStudent/:courseId/:studentId', async (req, res) => {
     try {
-        await students.findByIdAndDelete(req.params.studentId);
-        let response = await courses.findByIdAndUpdate(req.params.courseId, { $pull: { students: req.params.studentId } }, {new:true});
-        res.send("DELETED SUCCESSFULLY");
+        const deletedStudent = await students.findByIdAndDelete(req.params.studentId);
+        if (!deletedStudent) return res.send('Invalid Request');
+        const updatedCourse = await courses.findByIdAndUpdate(req.params.courseId, { $pull: { students: req.params.studentId } }, { new: true });
+        res.status(200).send('Deleted');
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
@@ -204,7 +200,7 @@ app.post('/createAdmin', async (req, res) => {
 //update admin
 app.put('/updateAdmin/:adminId', async (req, res) => {
     try {
-        const updateAdmin = await admins.findByIdAndUpdate(req.params.adminId, req.body, {new:true});
+        const updateAdmin = await admins.findByIdAndUpdate(req.params.adminId, req.body, { new: true });
         (!updateAdmin) ? res.send('Invalid Request') : res.json(updateAdmin);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
@@ -240,7 +236,7 @@ app.post('/addFees/:courseId', async (req, res) => {
 
 app.put('/updatedFees/:feeId', async (req, res) => {
     try {
-        const updatedFees = await fees.findByIdAndUpdate(req.params.feeId, req.body, {new:true});
+        const updatedFees = await fees.findByIdAndUpdate(req.params.feeId, req.body, { new: true });
         (!updatedFees) ? res.send('Invalid Request') : res.send(updatedFees);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
@@ -253,7 +249,7 @@ app.delete('/deleteFees/:courseId/:feeId', async (req, res) => {
     try {
         const deletedFees = await fees.findByIdAndDelete(req.params.feeId);
         if (!deletedFees) res.send('Invalid Request');
-        const updatedCourse = await courses.findByIdAndUpdate(req.params.courseId, { $pull: { fee: req.params.feeId } }, {new:true});
+        const updatedCourse = await courses.findByIdAndUpdate(req.params.courseId, { $pull: { fee: req.params.feeId } }, { new: true });
         (!updatedCourse) ? res.send('Fee deletion from course failed') : res.send('Deleted Successfully');
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
