@@ -61,17 +61,30 @@ app.put("/updateSchool/:schoolId", async (req, res) => {
     }
 });
 
-// //delete school route
-// app.delete("/deleteSchool/:schoolId", async (req, res) => {
-//     try {
-//         const deletedSchool = await schools.findById(req.params.schoolId).populate('course');
-//         if (!deletedSchool) res.send('Invalid Request');
-//         const students = await courses.find({ _id: { $in: deletedSchool.course } }, ['students']);
-//         console.log(students);
-//     } catch (error) {
-//         res.status(500).send('some error occured,' + error.message);
-//     }
-// })
+//NOT EFFICIENT School Delete Route
+app.delete('/deleteSchool/:schoolId', async (req, res) => {
+    const schoolId = req.params.schoolId;
+    try {
+        // find one school
+        const findSchool = await schools.findOne({ _id: schoolId });
+        if (!findSchool) return res.send('School Not Found');
+        const findCourses = await courses.find({ _id: { $in: findSchool.course } });
+        if (!findCourses) return res.send('Course Not Found');
+        findCourses.map(async (course) => {
+            const deletedStudents = await students.deleteMany({ _id: { $in: course.students } });
+            if (!deletedStudents) return res.send('Students Not Deleted. Please Contact the Admin');
+            const deletedFees = await fees.deleteMany({ _id: { $in: course.fee } });
+            if (!deletedFees) return res.send('Course Fee Not Deleted. Please Contact the Admin');
+            const deletedCourses = await courses.deleteMany({ _id: { $in: findSchool.course } });
+            if (!deletedCourses) return res.send('Courses Not Deleted. Please Contact the Admin');
+            const deletedSchool = await schools.deleteOne({ _id: schoolId });
+            if (!deletedSchool) return res.send('School Deletion Failed. Please Contact the Admin');
+            res.status(200).send('Deleted School Successfully');
+        })
+    } catch (error) {
+        res.status(500).send('some error occured, ' + error.message);
+    }
+})
 
 // COURSE ROUTE
 
@@ -126,13 +139,13 @@ app.delete('/deleteCourse/:courseId', async (req, res) => {
     }
 })
 
-//STUDENT ROUTE
+//STUDENT ROUTE2
 
 //fetch by ROLL NO
 app.get('/fetchStudents_RR/:studentId', async (req, res) => {
     const foundStudent = await students.findById(req.params.studentId).select('name fee_status roll_number course_code');
     if (!foundStudent) return res.send('Invalid Request');
-    res.send(foundStudent);
+    res.json(foundStudent);
 })
 //fetch 
 app.get('/fetchStudents/:courseId', async (req, res) => {
@@ -226,6 +239,7 @@ app.post('/addFees/:courseId', async (req, res) => {
         if (!foundCourse) res.send('Invalid Request');
         const addedFee = await fees.create(req.body);
         foundCourse.fee.push(addedFee);
+        foundCourse.save();
         res.send(addedFee);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);

@@ -15,7 +15,8 @@ const StudentSchema = mongoose.Schema({
     }, 
     password: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
     course_id: {
         type: mongoose.Schema.Types.ObjectId,

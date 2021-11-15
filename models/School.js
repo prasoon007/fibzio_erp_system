@@ -12,7 +12,8 @@ const SchoolSchema = mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
     school_code: {
         type: String,
