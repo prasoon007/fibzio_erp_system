@@ -61,7 +61,7 @@ app.put("/updateSchool/:schoolId", async (req, res) => {
     }
 });
 
-//NOT EFFICIENT School Delete Route
+//School Delete Route
 app.delete('/deleteSchool/:schoolId', async (req, res) => {
     const schoolId = req.params.schoolId;
     try {
@@ -139,8 +139,21 @@ app.delete('/deleteCourse/:courseId', async (req, res) => {
     }
 })
 
-//STUDENT ROUTE2
+//STUDENT ROUTE
 
+//fetch by school id 
+app.get('/fetchStudents_SS/:schoolId', async (req, res) => {
+    const schoolId = req.params.schoolId;
+    const foundSchool = await schools.findOne({ _id: schoolId });
+    if (!foundSchool) return res.send('School Not Found');
+    const foundCourses = await courses.find({ _id: { $in: foundSchool.course } });
+    if (!foundCourses) return res.send('Course Not Found');
+    foundCourses.map(async (course) => {
+        const foundStudents = await students.find({ _id: { $in: course.students } });
+        if(!foundStudents) return res.send('No students found.');
+        res.send(foundStudents);
+    });
+})
 //fetch by ROLL NO
 app.get('/fetchStudents_RR/:studentId', async (req, res) => {
     const foundStudent = await students.findById(req.params.studentId).select('name fee_status roll_number course_code');
