@@ -18,6 +18,7 @@ const StudentSchema = mongoose.Schema({
         required: true,
         select: false
     },
+    isStudent: Boolean,
     course_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'course'

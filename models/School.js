@@ -15,6 +15,7 @@ const SchoolSchema = mongoose.Schema({
         required: true,
         select: false
     },
+    isSchool: Boolean,
     school_code: {
         type: String,
         unique: true
