@@ -11,10 +11,10 @@ schoolCtrl.apiFetchSchool = async (req, res, next) => {
     }
 }
 
-schoolCtrl.apiFetchSchool_s = async (req, res, next) => {
+schoolCtrl.apiFetchSchool_ss = async (req, res, next) => {
     try {
         const schoolId = req.params.schoolId;
-        const fetchedSchool = await schoolServices.fetchSchool_s(schoolId);
+        const fetchedSchool = await schoolServices.fetchSchool_ss(schoolId);
         !fetchedSchool ? res.status(404).send('School fetch error') : res.send(fetchedSchool);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);

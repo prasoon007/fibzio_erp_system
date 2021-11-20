@@ -17,7 +17,7 @@ app.use(express.json());
 app.use('/', require('./routes/FeeRoutes'));
 app.use('/', require('./routes/AdminRoutes'));
 app.use('/', require('./routes/SchoolRoutes'));
-app.use('/', require('./routes/StudentRoutes'));
+app.use('/', require('./routes/StudentRoutes')); //fetching students through school id broken
 app.use('/', require('./routes/CourseRoutes'));
 
 app.listen(5000, () => {

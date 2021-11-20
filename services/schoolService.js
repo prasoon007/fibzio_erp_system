@@ -1,6 +1,7 @@
 const schools = require('../models/School'),
     courses = require('../models/Course'),
-    fees = require('../models/Fee');
+    fees = require('../models/Fee'),
+    students = require('../models/Student');
 
 const schoolService = {};
 
@@ -13,7 +14,7 @@ schoolService.fetchSchool = async () => {
     }
 }
 
-schoolService.fetchSchool_s = async (schoolId) => {
+schoolService.fetchSchool_ss = async (schoolId) => {
     try {
         const foundSchool = await schools.findById(schoolId);
         return foundSchool;

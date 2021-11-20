@@ -44,8 +44,8 @@ courseService.deleteCourse = async (schoolId, courseId) => {
     try {
         const deletedCourse = await courses.findByIdAndDelete(courseId);
         if (!deletedCourse) return console.log('Course search and delete error');
-        await students.deleteMany({ _id: { $in: deletedCourse.students } });
-        await schools.findByIdAndDelete(schoolId, {$pull: {course: courseId}}, {new: true});
+        const deletedStudents = await students.deleteMany({ _id: { $in: deletedCourse.students } });
+        const schoolD = await schools.findByIdAndUpdate(schoolId, {$pull: {course: courseId}}, {new: true});
         return deletedCourse;
     } catch (error) {
         console.log(`Course delete error:  ${error}`)
