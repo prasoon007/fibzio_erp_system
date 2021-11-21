@@ -2,16 +2,6 @@ const adminServices = require('../services/adminService');
 
 adminCtrl = {};
 
-adminCtrl.apiAddAdmin = async (req, res, next) => {
-    try {
-        const data = req.body;
-        const addedAdmin = await adminServices.createAdmin(data);
-        !addedAdmin ? res.status(404).send('Admin add error') : res.send(addedAdmin);
-    } catch (error) {
-        res.status(500).send('some error occured,' + error.message);
-    }
-}
-
 adminCtrl.apiUpdateAdmin = async (req, res, next) => {
     try {
         const adminId = req.params.adminId;

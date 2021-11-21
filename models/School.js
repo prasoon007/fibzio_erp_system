@@ -5,7 +5,7 @@ const SchoolSchema = mongoose.Schema({
         type: String,
         unique: true
     },
-    username: {
+    email: {
         type: String,
         unique: true,
         required: true
@@ -15,7 +15,7 @@ const SchoolSchema = mongoose.Schema({
         required: true,
         select: false
     },
-    isSchool: Boolean,
+    authLev: Number,
     school_code: {
         type: String,
         unique: true

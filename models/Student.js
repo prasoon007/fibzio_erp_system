@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const StudentSchema = mongoose.Schema({
     roll_number: {
         type: String, 
-        required: true
+        required: true,
+        unique: true
     }, 
     name: {
         type: String,
@@ -18,14 +19,13 @@ const StudentSchema = mongoose.Schema({
         required: true,
         select: false
     },
-    isStudent: Boolean,
+    authLev: Number,
     course_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'course'
     },
     course_code: String,
     dob: Date,
-
     address: [{
         type: String,
         required: true
