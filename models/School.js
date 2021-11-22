@@ -5,7 +5,7 @@ const SchoolSchema = mongoose.Schema({
         type: String,
         unique: true
     },
-    email: {
+    username: {
         type: String,
         unique: true,
         required: true
