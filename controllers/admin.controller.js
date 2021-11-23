@@ -1,4 +1,5 @@
-const adminServices = require('../services/adminService');
+const adminServices = require('../services/adminService'),
+      middleware = require('../middlewares/index');
 
 adminCtrl = {};
 

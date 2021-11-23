@@ -2,16 +2,6 @@ const studentServices = require('../services/studentService');
 
 const studentCtrl = {};
 
-studentCtrl.fetchStudents_ss = async (req, res, next) => {
-    try {
-        const schoolId = req.params.schoolId;
-        const fetchedStudents = await studentServices.fetchStudents_ss(schoolId);
-        !fetchedStudents ? res.status(404).send('Students fetch error') : res.send(fetchedStudents);
-    } catch (error) {
-        res.status(500).send('some error occured,' + error.message);
-    }
-}
-
 studentCtrl.fetchStudent_rr = async (req, res, next) => {
     try {
         const studentId = req.params.studentId;

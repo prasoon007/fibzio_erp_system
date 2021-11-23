@@ -4,23 +4,6 @@ const students = require('../models/Student'),
 
 const studentService = {};
 
-studentService.fetchStudents_ss = async (schoolId) => {
-    try {
-        const schoolId = req.params.schoolId;
-        const foundSchool = await schools.findOne({ _id: schoolId });
-        if (!foundSchool) return res.send('School Not Found');
-        const foundCourses = await courses.find({ _id: { $in: foundSchool.course } });
-        if (!foundCourses) return res.send('Course Not Found');
-        foundCourses.map(async (course) => {
-            const foundStudents = await students.find({ _id: { $in: course.students } });
-            if (!foundStudents) return res.send('No students found.');
-            res.send(foundStudents);
-        });
-} catch (error) {
-    console.log(`Students fetch error: ${error}`);
-}
-};
-
 studentService.fetchStudent_rr = async (studentId) => {
     try {
         const foundStudent = await students.findById(studentId).select('name fee_status roll_number course_code');
