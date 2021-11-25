@@ -7,7 +7,9 @@ const express = require('express'),
     admins = require('./models/Admin'),
     students = require('./models/Student'),
     schools = require('./models/School'),
-    bcrypt = require('bcryptjs');
+    bcrypt = require('bcryptjs'),
+    PaytmChecksum = require('paytmchecksum'),
+    {v4: orderIdGen} = require('uuid');
 
 const studentService = require('./services/studentService');
 
@@ -15,6 +17,7 @@ require('dotenv').config();
 //Setting up initials
 connectToMongoDb();
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 //ROUTES REGISTRATION
@@ -173,7 +176,7 @@ app.post('/auth/loginCred', [
         return res.status(400).json({ success, errors: errors.array() }); //return error + json
     }
     try {
-        const {email, password, authLev} = req.body;
+        const { email, password, authLev } = req.body;
         let user = await students.findOne({ email }).select('+password');
         if (!user) return res.status(400).send({ success, error: 'Invalid Credentials' });
         //after finding user, we are verifying req.body.password(hash) from password hash from database
@@ -194,6 +197,25 @@ app.post('/auth/loginCred', [
     }
 })
 
+//paytm integration
+app.post('/paymentGateway/payTm', (req, res) => {
+    // body = "{"\mid\":"\YOUR_MID_HERE\","\orderId\":"\YOUR_ORDER_ID_HERE\"}"
+    var body = {
+        'mid': process.env.mid,
+        'orderId': orderIdGen()
+    }
+
+    /**
+    * Generate checksum by parameters we have
+    * Find your Merchant Key in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys 
+    */
+    var paytmChecksum = PaytmChecksum.generateSignature(body, process.env.mkey);
+    paytmChecksum.then(function (result) {
+        res.send({checksum: result})
+    }).catch(function (error) {
+        res.status(500).json('Internal Server Error ' + error.message);
+    });
+});
 //Server Start
 app.listen(5000, () => {
     console.log('Started Successfully');
