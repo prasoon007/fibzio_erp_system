@@ -10,16 +10,16 @@ const SchoolSchema = mongoose.Schema({
         unique: true,
         required: true
     },
+    school_code: {
+        type: String,
+        unique: true
+    },
     password: {
         type: String,
         required: true,
         select: false
     },
     authLev: Number,
-    school_code: {
-        type: String,
-        unique: true
-    },
     course: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'course'

@@ -1,13 +1,11 @@
 const mongoose = require('mongoose');
 
 const FeeSchema = mongoose.Schema({
-    course_name:{
-        type: String
-    },
-    total_fees: String,
-    break_up: String,
-    deadline_date: String,
-    min_amount_allowed: String,
+    course_name: Number,
+    total_fees: Number,
+    break_up: Number,
+    deadline_date: Date,
+    min_amount_allowed: Number,
     relaxation: String
 })
 

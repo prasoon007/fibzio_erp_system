@@ -1,4 +1,7 @@
-const schoolServices = require('../services/schoolService');
+const schoolServices = require('../services/schoolService'),
+bcrypt = require('bcryptjs');
+
+require('dotenv').config();
 
 schoolCtrl = {};
 
@@ -24,6 +27,9 @@ schoolCtrl.apiFetchSchool_ss = async (req, res, next) => {
 
 schoolCtrl.apiAddSchool = async (req, res, next) => {
     try {
+        let salt = await bcrypt.genSalt(10);  //!generates salt
+        const secPass = await bcrypt.hash(req.body.password, salt); //!generates hashed password
+        req.body.password = secPass;
         const data = req.body;
         const addedSchool = await schoolServices.addSchool(data);
         !addedSchool ? res.status(404).send('School add error') : res.send(addedSchool);

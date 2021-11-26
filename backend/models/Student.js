@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const StudentSchema = mongoose.Schema({
     roll_number: {
-        type: String, 
+        type: Number, 
         required: true,
         unique: true
     }, 
@@ -20,10 +20,6 @@ const StudentSchema = mongoose.Schema({
         select: false
     },
     authLev: Number,
-    course_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'course'
-    },
     course_code: String,
     dob: Date,
     address: [{
@@ -31,7 +27,7 @@ const StudentSchema = mongoose.Schema({
         required: true
     }],
     phone_number: [{
-        type: String,
+        type: Number,
         required: true
     }],
     student_status: {
@@ -42,15 +38,15 @@ const StudentSchema = mongoose.Schema({
         reciept: [{
             type: String
         }],
-        late_fees: String,
-        paid: String,
-        pending: String
+        late_fees:  Number,
+        paid: Number,
+        pending: Number
     },
     parent: {
         fathers_name: String,
         mothers_name: String,
         mob_number: [{
-            type: String
+            type: Number
         }]
     }
 })

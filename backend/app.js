@@ -111,8 +111,8 @@ app.post('/auth/adminSchoolLogin', [
     const { username, password, authLev } = req.body; //destructuring email and pass from req.body
     try {
         // finding user from req.body.email from database
-        if (authLev == 0) user = await admins.findOne({ username });
-        else if (authLev == 1) user = await schools.findOne({ username });
+        if (authLev == 0) user = await admins.findOne({ username }).select('+password');
+        else if (authLev == 1) user = await schools.findOne({ username }).select('+password');
         if (!user) return res.status(400).send({ success, error: 'Invalid Credentials' });
         //after finding user, we are verifying req.body.password(hash) from password hash from database
         let passCheck = await bcrypt.compare(password, user.password);

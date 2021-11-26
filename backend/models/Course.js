@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const CourseSchema = mongoose.Schema({
-    school_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'school'
-    },
     fee: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'fee'

@@ -7,9 +7,10 @@ const AdminSchema = mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
-    authLev: String
+    authLev: Number
 })
 
 module.exports = mongoose.model('admin', AdminSchema);
