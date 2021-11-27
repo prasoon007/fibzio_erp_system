@@ -1,3 +1,8 @@
+//TODO :- make course code unique in particular school
+//TODO :- make middlewares
+//TODO:- make payment gateway integration
+//TODO:- integrate validation on each create(school, course, fees, student) route
+
 const express = require('express'),
     app = express(),
     connectToMongoDb = require('./db'),
@@ -9,7 +14,9 @@ const express = require('express'),
     schools = require('./models/School'),
     bcrypt = require('bcryptjs'),
     PaytmChecksum = require('paytmchecksum'),
-    {v4: orderIdGen} = require('uuid');
+    { v4: orderIdGen } = require('uuid'),
+    qs = require('querystring'),
+    https = require('https');
 
 const studentService = require('./services/studentService');
 
@@ -17,8 +24,9 @@ require('dotenv').config();
 //Setting up initials
 connectToMongoDb();
 app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ extended: false }));
+
 
 //ROUTES REGISTRATION
 app.use('/', require('./routes/FeeRoutes'));
@@ -64,39 +72,6 @@ app.post('/auth/createAdmin', [
     }
 });
 
-// //SCHOOL SIGN UP ROUTE
-// app.post('/auth/schoolSU', [
-//     body('school_code', 'please enter valid school code').not().isEmpty(),
-//     body('username', 'please enter valid username').not().isEmpty(),
-//     body('password', 'please enter valid pass').isLength({ min: 8 }).not().isEmpty(),
-//     body('authLev', 'Requirement error').not().isEmpty()
-// ], async (req, res) => {
-//     let success = false;
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//         return res.status(400).json({ success, errors: errors.array() }); //return error + json
-//     }
-//     try {
-//         const { school_code, username, password } = req.body;
-//         const school = await schools.findOne({ school_code, username });
-//         let salt = await bcrypt.genSalt(10); //generates salt 
-//         const secPass = await bcrypt.hash(password, salt); //generates hashed password
-//         let user = await schools.findByIdAndUpdate(school._id, {password: secPass})
-//         const data = {
-//             user: {
-//                 id: user.id,
-//                 authLev: user.authLev
-//             }
-//         }
-//         let authToken = jwt.sign(data, process.env.JWT_SECRET);
-//         success = true;
-//         res.json({ success, authToken });
-//     } catch (error) {
-//         res.status(500).json('Internal Server Error' + error.message);
-//     }
-// })
-
-
 //ADMIN AND SCHOOL ROUTE
 app.post('/auth/adminSchoolLogin', [
     body('username', 'please enter valid username').not().isEmpty().isLength({ min: 8 }),
@@ -131,38 +106,6 @@ app.post('/auth/adminSchoolLogin', [
         res.status(500).json('Internal Server Error' + error.message);
     }
 })
-
-// //STUDENT AND PARENT SIGN UP ROUTE
-// app.post('/auth/createCred', [
-//     body('roll_number', 'please enter valid roll no').not().isEmpty(),
-//     body('email', 'please enter valid email').isEmail().not().isEmpty(),
-//     body('password', 'please enter valid pass').isLength({ min: 8 }).not().isEmpty(),
-//     body('authLev', 'Requirement error').not().isEmpty()
-// ], async (req, res) => {
-//     let success = false;
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//         return res.status(400).json({ success, errors: errors.array() }); //return error + json
-//     }
-//     try {
-//         const { roll_number, email, password } = req.body;
-//         const student = await students.findOne({ roll_number, email });
-//         let salt = await bcrypt.genSalt(10); //generates salt 
-//         const secPass = await bcrypt.hash(password, salt); //generates hashed password
-//         let user = await students.findByIdAndUpdate(student._id, {password: secPass})
-//         const data = {
-//             user: {
-//                 id: user.id,
-//                 authLev: user.authLev
-//             }
-//         }
-//         let authToken = jwt.sign(data, process.env.JWT_SECRET);
-//         success = true;
-//         res.json({ success, authToken });
-//     } catch (error) {
-//         res.status(500).json('Internal Server Error' + error.message);
-//     }
-// })
 
 //STUDENT AND PARENT LOGIN ROUTE
 app.post('/auth/loginCred', [
@@ -199,24 +142,106 @@ app.post('/auth/loginCred', [
 
 //paytm integration
 app.post('/paymentGateway/payTm', (req, res) => {
-    // body = "{"\mid\":"\YOUR_MID_HERE\","\orderId\":"\YOUR_ORDER_ID_HERE\"}"
-    var body = {
-        'mid': process.env.mid,
-        'orderId': orderIdGen()
-    }
+    const { email, amount } = req.body;
+    var params = {};
 
-    /**
-    * Generate checksum by parameters we have
-    * Find your Merchant Key in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys 
-    */
-    var paytmChecksum = PaytmChecksum.generateSignature(body, process.env.mkey);
+    params['MID'] = process.env.mid,
+        params['WEBSITE'] = process.env.website,
+        params['CHANNEL_ID'] = process.env.channelIdWeb,
+        params['INDUSTRY_TYPE_ID'] = process.env.industryType,
+        params['ORDER_ID'] = orderIdGen(),
+        params['CUST_ID'] = email,
+        params['TXN_AMOUNT'] = JSON.stringify(amount)
+    params['CALLBACK_URL'] = 'http://localhost:5000/paymentResponse'
+
+
+    var paytmChecksum = PaytmChecksum.generateSignature(params, process.env.mkey);
     paytmChecksum.then(function (result) {
-        res.send({checksum: result})
+        let paytmParams = {
+            ...params,
+            "CHECKSUMHASH": result
+        }
+        res.json(paytmParams)
     }).catch(function (error) {
         res.status(500).json('Internal Server Error ' + error.message);
     });
 });
+
+
+//! paytm ka response idhar ata h bhai
+app.post('/paymentResponse', (req, res, next) => {
+    let body = {
+        ORDERID: req.body.ORDERID,
+        MID: req.body.MID,
+        TXNID: req.body.TXNID,
+        TXNAMOUNT: req.body.TXNAMOUNT,
+        PAYMENTMODE: req.body.PAYMENTMODE,
+        CURRENCY: req.body.CURRENCY,
+        TXNDATE: req.body.TXNDATE,
+        STATUS: req.body.STATUS,
+        RESPCODE: req.body.RESPCODE,
+        RESPMSG: req.body.RESPMSG,
+        GATEWAYNAME: req.body.GATEWAYNAME,
+        BANKTXIND: req.body.BANKTXNID,
+        BANKNAME: req.body.BANKNAME,
+        CHECKSUMHASH: req.body.CHECKSUMHASH
+    }
+    const paytmChecksum = req.body.CHECKSUMHASH;
+    delete req.body.CHECKSUMHASH;
+    var isVerifySignature = PaytmChecksum.verifySignature(body, process.env.mkey, paytmChecksum);
+    if (isVerifySignature) {
+        var paytmParams = {};
+        paytmParams.body = {
+            "mid": body.MID,
+            "orderId": body.ORDERID
+        };
+        PaytmChecksum.generateSignature(JSON.stringify(paytmParams.body), process.env.mkey).then(function (checksum) {
+            paytmParams.head = {
+                "signature": checksum
+            };
+            var post_data = JSON.stringify(paytmParams);
+
+            var options = {
+
+                /* for Staging */
+                hostname: 'securegw-stage.paytm.in',
+
+                /* for Production */
+                // hostname: 'securegw.paytm.in',
+
+                port: 443,
+                path: '/v3/order/status',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': post_data.length
+                }
+            };
+
+            // Set up the request
+            var response = "";
+            var post_req = https.request(options, function (post_res) {
+                post_res.on('data', function (chunk) {
+                    response += chunk;
+                });
+
+                post_res.on('end', function () {
+                    res.send(response);
+                });
+            });
+
+            // post the data
+            post_req.write(post_data);
+            post_req.end();
+        });
+
+
+    } else {
+        console.log("Checksum Mismatched");
+    }
+});
+
 //Server Start
 app.listen(5000, () => {
     console.log('Started Successfully');
-});
+})

@@ -28,7 +28,8 @@ const StudentSchema = mongoose.Schema({
     }],
     phone_number: [{
         type: Number,
-        required: true
+        required: true,
+        unique: true
     }],
     student_status: {
         type: String,
@@ -46,7 +47,8 @@ const StudentSchema = mongoose.Schema({
         fathers_name: String,
         mothers_name: String,
         mob_number: [{
-            type: Number
+            type: Number,
+            unique: true
         }]
     }
 })

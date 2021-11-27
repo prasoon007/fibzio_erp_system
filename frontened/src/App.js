@@ -1,10 +1,10 @@
 import './App.css';
-import Login from './components/Login';
+import Paytm from './components/Paytm';
 
 function App() {
   return (
-    <>
-      <Login />
+    <>  
+      <Paytm />
     </>
   );
 }

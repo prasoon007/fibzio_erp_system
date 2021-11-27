@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const SchoolSchema = mongoose.Schema({
     school_name: {
         type: String,
-        unique: true
+        unique: true,
+        required: true
     },
     username: {
         type: String,
@@ -12,14 +13,14 @@ const SchoolSchema = mongoose.Schema({
     },
     school_code: {
         type: String,
-        unique: true
+        unique: true,
+        required: true
     },
     password: {
         type: String,
         required: true,
         select: false
     },
-    authLev: Number,
     course: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'course'
