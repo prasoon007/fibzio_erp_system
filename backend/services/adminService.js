@@ -2,6 +2,15 @@ const admins = require('../models/Admin');
 
 const adminService = {};
 
+adminService.createAdmin = async (username, password) => {
+    try {
+        const addedAdmin = await admins.create({username, password});
+        return addedAdmin;
+    } catch (error) {
+        console.log(`Admin create error: ${error}`);
+    }
+}
+
 adminService.updateAdmin = async (adminId, data) => {
     try {
         const updateAdmin = await admins.findByIdAndUpdate(adminId, data, { new: true });

@@ -18,8 +18,6 @@ const express = require('express'),
     qs = require('querystring'),
     https = require('https');
 
-const studentService = require('./services/studentService');
-
 require('dotenv').config();
 //Setting up initials
 connectToMongoDb();
@@ -34,43 +32,6 @@ app.use('/', require('./routes/AdminRoutes'));
 app.use('/', require('./routes/SchoolRoutes'));
 app.use('/', require('./routes/StudentRoutes')); //fetching students through school id broken
 app.use('/', require('./routes/CourseRoutes'));
-
-//ADMIN CREATE ROUTE
-app.post('/auth/createAdmin', [
-    body('username', 'enter a valid email').not().isEmpty().isLength({ min: 8 }),
-    body('password', 'enter a valid pass').not().isEmpty().isLength({ min: 8 }),
-    body('authLev', 'Requirement error').not().isEmpty()
-], async (req, res) => {
-    let success;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ success, errors: errors.array() }); //return error + json
-    }
-    try {
-        let salt = await bcrypt.genSalt(10); //generates salt 
-        const secPass = await bcrypt.hash(req.body.password, salt); //generates hashed password
-        //user is added to databse using .create()
-        let admin = await admins.create({
-            username: req.body.username,
-            password: secPass,
-            authLev: req.body.authLev,
-        })
-        //setting up authToken
-        const data = {
-            user: {
-                id: admin.id,
-                authLev: admin.authLev
-            }
-        }
-        //auth token is generated using data and secret string
-        const authToken = jwt.sign(data, process.env.JWT_SECRET);
-        success = true;
-        res.json({ success, authToken });//here using es6 authtoken is being send
-    }
-    catch (error) {
-        res.status(500).send('some error occured,' + error.message);
-    }
-});
 
 //ADMIN AND SCHOOL ROUTE
 app.post('/auth/adminSchoolLogin', [
