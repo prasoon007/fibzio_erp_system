@@ -7,7 +7,7 @@ router.get('/fetchSchools', schoolController.apiFetchSchool);
 router.get('/fetchSchool_ss/:schoolId', schoolController.apiFetchSchool_ss);
 router.post('/addSchool', middlewareObj.validateSchoolPost, schoolController.apiAddSchool);
 router.put('/updateSchool/:schoolId', middlewareObj.validateSchoolPutDelete, schoolController.apiUpdateSchool);
-router.delete('/deleteSchool/:schoolId', middlewareObj.validateSchoolPutDelete, schoolController.apiDeleteSchool);
+router.delete('/deleteSchool/:schoolId', schoolController.apiDeleteSchool);
 
 
 

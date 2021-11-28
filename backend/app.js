@@ -1,7 +1,8 @@
 //TODO :- make course code unique in particular school
-//TODO :- make middlewares
-//TODO:- make payment gateway integration
-//TODO:- integrate validation on each create(school, course, fees, student) route
+//TODO :- add authorization middleware
+//TODO :- think about fees logic 
+//TODO :- add csv handler
+//TODO :- add invoice generator
 
 const express = require('express'),
     app = express(),
@@ -15,10 +16,11 @@ const express = require('express'),
     bcrypt = require('bcryptjs'),
     PaytmChecksum = require('paytmchecksum'),
     { v4: orderIdGen } = require('uuid'),
-    qs = require('querystring'),
     https = require('https');
 
+//setting .env file
 require('dotenv').config();
+
 //Setting up initials
 connectToMongoDb();
 app.use(cors());
@@ -30,76 +32,9 @@ app.use(express.json({ extended: false }));
 app.use('/', require('./routes/FeeRoutes'));
 app.use('/', require('./routes/AdminRoutes'));
 app.use('/', require('./routes/SchoolRoutes'));
-app.use('/', require('./routes/StudentRoutes')); //fetching students through school id broken
+app.use('/', require('./routes/StudentRoutes'));
 app.use('/', require('./routes/CourseRoutes'));
-
-//ADMIN AND SCHOOL ROUTE
-app.post('/auth/adminSchoolLogin', [
-    body('username', 'please enter valid username').not().isEmpty().isLength({ min: 8 }),
-    body('password', 'please enter valid pass').not().isEmpty().isLength({ min: 8 }),
-    body('authLev', 'Requirement error').not().isEmpty()
-], async (req, res) => {
-    let success = false;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ success, errors: errors.array() });
-    }
-    const { username, password, authLev } = req.body; //destructuring email and pass from req.body
-    try {
-        // finding user from req.body.email from database
-        if (authLev == 0) user = await admins.findOne({ username }).select('+password');
-        else if (authLev == 1) user = await schools.findOne({ username }).select('+password');
-        if (!user) return res.status(400).send({ success, error: 'Invalid Credentials' });
-        //after finding user, we are verifying req.body.password(hash) from password hash from database
-        let passCheck = await bcrypt.compare(password, user.password);
-        if (!passCheck) return res.status(400).json({ success, error: 'Invalid Password Credentials' });
-        //setting up jwt using user id and authLev
-        const data = {
-            user: {
-                id: user.id,
-                authLev: user.authLev
-            }
-        }
-        let authToken = jwt.sign(data, process.env.JWT_SECRET);
-        success = true;
-        res.json({ success, authToken });
-    } catch (error) {
-        res.status(500).json('Internal Server Error' + error.message);
-    }
-})
-
-//STUDENT AND PARENT LOGIN ROUTE
-app.post('/auth/loginCred', [
-    body('email', 'please enter valid email').isEmail(),
-    body('password', 'please valid password').not().isEmpty().isLength({ min: 8 }),
-    body('authLev', 'Requirement error').not().isEmpty()
-], async (req, res) => {
-    let success = false;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ success, errors: errors.array() }); //return error + json
-    }
-    try {
-        const { email, password, authLev } = req.body;
-        let user = await students.findOne({ email }).select('+password');
-        if (!user) return res.status(400).send({ success, error: 'Invalid Credentials' });
-        //after finding user, we are verifying req.body.password(hash) from password hash from database
-        let passCheck = await bcrypt.compare(password, user.password);
-        if (!passCheck) return res.status(400).json({ success, error: 'Password Credentials' });
-        //setting up jwt using user id and authLev
-        const data = {
-            user: {
-                id: user.id,
-                authLev: user.authLev
-            }
-        }
-        let authToken = jwt.sign(data, process.env.JWT_SECRET);
-        success = true;
-        res.json({ success, authToken });
-    } catch (error) {
-        res.status(500).json('Internal Server Error ' + error.message);
-    }
-})
+app.use('/', require('./routes/AuthRoutes'));
 
 //paytm integration
 app.post('/paymentGateway/payTm', (req, res) => {

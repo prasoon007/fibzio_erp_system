@@ -1,4 +1,5 @@
 const studentServices = require('../services/studentService');
+const bcrypt = require('bcryptjs');
 
 const studentCtrl = {};
 
@@ -26,6 +27,10 @@ studentCtrl.addStudent = async (req, res, next) => {
     try {
         const courseId = req.params.courseId;
         const data = req.body;
+        const { password } = req.body;
+        let salt = await bcrypt.genSalt(10);  //!generates salt
+        const secPass = await bcrypt.hash(password, salt); //!generates hashed password
+        data.password = secPass;
         const addedStudent = await studentServices.addStudent(courseId, data);
         !addedStudent ? res.status(404).send('Student add error') : res.send(addedStudent);
     } catch (error) {
