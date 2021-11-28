@@ -32,7 +32,7 @@ middleware.validateAdminPostSchoolAuth = [
     }
 ];
 
-middleware.validateAdminPutDeleteSchoolAuth = [
+middleware.validateAdminPutSchoolAuth = [
     body('username', 'Min length is 8').trim().isLength({ min: 8 }),
     body('password', 'Strong password required').trim().isStrongPassword(),
     body('authLev', 'Requirement error').trim(),
@@ -70,7 +70,7 @@ middleware.validateSchoolPost = [
 ]
 
 
-middleware.validateSchoolPutDelete = [
+middleware.validateSchoolPut = [
     body('school_name', 'Min length is 8').trim().isLength({ min: 8 }),
     body('username', 'Min lenght is 8').trim().isLength({ min: 8 }),
     body('password').trim().isStrongPassword().withMessage('Password must have lower,uppercase and special characters'),
@@ -96,7 +96,7 @@ middleware.validateCoursePost = [
     }
 ];
 
-middleware.validateCoursePutDelete = [
+middleware.validateCoursePut = [
     body('course_name', 'Min length is 8').trim().isLength({ min: 3 }),
     body('course_code', 'Length between 8 and 12 allowed').trim().isLength({ min: 8, max: 12 }),
     body('date.start_date', 'Must be in date format').trim().isDate(),
@@ -133,7 +133,7 @@ middleware.validateStudentPost = [
 ]
 
 
-middleware.validateStudentPutDelete = [
+middleware.validateStudentPut = [
     body('email', 'Enter valid email').trim().isEmail(),
     body('password', 'Must be between 8 to 12 characters').trim().isLength({ min: 8, max: 12 }),
     body('course_code', 'Required and should be numeric').trim().isNumeric(),
@@ -168,7 +168,7 @@ middleware.validateFeesPost = [
 ]
 
 
-middleware.validateFeesPutDelete = [
+middleware.validateFeesPut = [
     body('course_name', 'Course name is required').trim(),
     body('total_fees', 'Required and must be numeric').trim().isNumeric(),
     body('min_amount_allowed', 'Required and must be numeric').trim().isNumeric(),
