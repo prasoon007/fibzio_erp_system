@@ -4,6 +4,8 @@
 //TODO :- add csv handler
 //TODO :- add invoice generator
 
+const middlewareObj = require('./middlewares');
+
 const express = require('express'),
     app = express(),
     connectToMongoDb = require('./db'),
@@ -63,7 +65,9 @@ app.post('/paymentGateway/payTm', (req, res) => {
     });
 });
 
-
+app.post('/checkFetchUser', middlewareObj.fetchUser, (req, res) => {
+    res.send(req.user);
+});
 //! paytm ka response idhar ata h bhai
 app.post('/paymentResponse', (req, res, next) => {
     let body = {
