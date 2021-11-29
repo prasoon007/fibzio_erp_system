@@ -10,6 +10,7 @@ const CourseSchema = mongoose.Schema({
     },
     course_code: {
         type: String,
+        unique: true
     },
     school_code: {
         type: String,
@@ -24,5 +25,6 @@ const CourseSchema = mongoose.Schema({
         ref: 'student'
     }]
 })
+
 
 module.exports = mongoose.model('course', CourseSchema);

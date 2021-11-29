@@ -2,7 +2,6 @@ const admins = require('../models/Admin'),
     students = require('../models/School'),
     schools = require('../models/School'),
     parents = require('../models/Student');
-const schoolService = require('./schoolService');
 const authService = {};
 
 authService.authAdminSchoolLogin = async (username, authLev) => {

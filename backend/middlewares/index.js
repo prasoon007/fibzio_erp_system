@@ -61,7 +61,7 @@ middleware.validateSchoolPost = [
     body('school_name', 'Min length is 8').trim().not().isEmpty().isLength({ min: 8 }),
     body('username', 'Min lenght is 8').trim().not().isEmpty().isLength({ min: 8 }),
     body('password').trim().not().isEmpty().withMessage('Password Required').isStrongPassword().withMessage('Password must have lower,uppercase and special characters'),
-    body('school_code', 'School code is required').trim().not().isEmpty(),
+    body('school_code', 'School code is required').trim().not().isEmpty().isNumeric().withMessage('Should be Numeric Value'),
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -75,6 +75,7 @@ middleware.validateSchoolPut = [
     body('school_name', 'Min length is 8').trim().isLength({ min: 8 }),
     body('username', 'Min lenght is 8').trim().isLength({ min: 8 }),
     body('password').trim().isStrongPassword().withMessage('Password must have lower,uppercase and special characters'),
+    body('school_code', 'School code is required').trim().isNumeric().withMessage('Should be Numeric Value'),
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -85,7 +86,6 @@ middleware.validateSchoolPut = [
 
 middleware.validateCoursePost = [
     body('course_name', 'Min length is 8').trim().not().isEmpty().isLength({ min: 3 }),
-    body('course_code', 'Length between 8 and 12 allowed').trim().not().isEmpty().isLength({ min: 8, max: 12 }),
     body('date.start_date', 'Must be in date format').trim().isDate(),
     body('date.end_date', 'Must be in date format').trim().isDate(),
     body('students_count', 'Required and Numeric value allowed only').trim().not().isEmpty().isNumeric(),
@@ -99,7 +99,6 @@ middleware.validateCoursePost = [
 
 middleware.validateCoursePut = [
     body('course_name', 'Min length is 8').trim().isLength({ min: 3 }),
-    body('course_code', 'Length between 8 and 12 allowed').trim().isLength({ min: 8, max: 12 }),
     body('date.start_date', 'Must be in date format').trim().isDate(),
     body('date.end', 'Must be in date format').trim().isDate(),
     body('students_count', 'Numeric value allowed only').trim().isNumeric(),
