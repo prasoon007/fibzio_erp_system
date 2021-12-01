@@ -10,7 +10,7 @@ authCtrl.apiAuthAdminSchoolLogin = async (req, res, next) => {
         const { username, password, authLev } = req.body;
         const foundUser = await authService.authAdminSchoolLogin(username, authLev);
         if (!foundUser) return res.status(400).send({ success: false, error: 'Invalid Credentials' });
-        //after finding user, we are verifying req.body.password(hash) from password hash from database
+        //* after finding user, we are verifying req.body.password(hash) from password hash from database
         let passCheck = await bcrypt.compare(password, foundUser.password);
         if (!passCheck) return res.status(400).json({ success: false, error: 'Invalid Password Credentials' });
         //setting up jwt using user id and authLev

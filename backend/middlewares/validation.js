@@ -1,22 +1,24 @@
 const jwt = require('jsonwebtoken'),
-    bcrypt = require('bcryptjs'),
-    { body, validationResult } = require('express-validator');
+    { body, validationResult } = require('express-validator'),
+    admins = require('../models/Admin');
 
 
 require('dotenv').config();
 
 const middleware = {};
 
-middleware.fetchUser = (req, res, next) => {
-    const token = req.header('auth-token'); //recieving header from req.header
+middleware.fetchUser = async (req, res, next) => {
+    const token = req.header('auth-token'); //*recieving header from req.header
     if (!token) return res.status(401).json({ "error1": "Please Enter a valid token" });
     try {
-        const data = jwt.verify(token, process.env.JWT_SECRET); //verifying token and extracting user.id back from it back.
-        //storing extracted info from token to req.user which is passed on the next function
+        const data = jwt.verify(token, process.env.JWT_SECRET);
         req.user = data.user
-        //used to execute next funct specified in the route ex:- (req, res)
-        if(req.user.authLev == 0)next()
-        else return res.send('Bhakk sale');
+        //! Verifying Admin Authorization Here Only
+        if (req.user.authLev == 0) {
+            const authAdmin = await admins.findById(req.user.id);
+            if (!authAdmin) return res.status(401).send('Authorization Error');
+        }
+        next();
     } catch (error) {
         return res.status(401).json({ "error2": "Please Enter a valid token" });
     }
@@ -26,14 +28,16 @@ middleware.validateAdminPostSchoolAuth = [
     body('password', 'Strong password required').trim().not().isEmpty().isStrongPassword(),
     body('authLev', 'Requirement error').trim().not().isEmpty(),
     (req, res, next) => {
+        //TODO Need your attendtion sir
         const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
-        } next();
+        if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+        if (!(req.user.authLev == 0 || req.user.authLev == 1)) res.status(401).send('Unauthorized Operation')
+        next();
+
     }
 ];
 
-middleware.validateAdminPutSchoolAuth = [
+middleware.validateAdminPut = [
     body('username', 'Min length is 8').trim().isLength({ min: 8 }),
     body('password', 'Strong password required').trim().isStrongPassword(),
     body('authLev', 'Requirement error').trim(),
@@ -41,7 +45,9 @@ middleware.validateAdminPutSchoolAuth = [
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
-        } next();
+        }
+        if (!(req.user.authLev == 0)) return res.status(401).send('Unauthorized Operation');
+        next();
     }
 ];
 
@@ -53,7 +59,8 @@ middleware.validateStudentParentAuth = [
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
-        } next();
+        }
+        next();
     }
 ];
 
@@ -67,6 +74,8 @@ middleware.validateSchoolPost = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         } next();
+        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        next();
     }
 ]
 
@@ -78,9 +87,10 @@ middleware.validateSchoolPut = [
     body('school_code', 'School code is required').trim().isNumeric().withMessage('Should be Numeric Value'),
     (req, res, next) => {
         const errors = validationResult(req);
-        if (!errors.isEmpty()) {
+        if (!errors.isEmpty())
             return res.status(400).json({ success: false, errors: errors.array() });
-        } next();
+        if (!(req.user.authLev == 0 || req.user.authLev == 1)) return res.status(401).send('Unauthorized Operation');
+        next();
     }
 ]
 
@@ -93,7 +103,10 @@ middleware.validateCoursePost = [
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
-        } next();
+        }
+        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        next();
+
     }
 ];
 
@@ -106,7 +119,9 @@ middleware.validateCoursePut = [
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
-        } next();
+        }
+        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        next();
     }
 ];
 
@@ -128,7 +143,9 @@ middleware.validateStudentPost = [
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
-        } next();
+        }
+        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        next();
     }
 ]
 
@@ -146,7 +163,9 @@ middleware.validateStudentPut = [
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
-        } next();
+        }
+        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        next();
     }
 ]
 
@@ -163,7 +182,9 @@ middleware.validateFeesPost = [
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
-        } next();
+        }
+        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        next();
     }
 ]
 
@@ -178,7 +199,9 @@ middleware.validateFeesPut = [
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
-        } next();
+        }
+        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        next();
     }
 ]
 

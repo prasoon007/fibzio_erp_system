@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const courseController = require('../controllers/course.controller');
-const middlewareObj = require('../middlewares/index');
+const middlewareObj = require('../middlewares/validation');
 
 router.get('/fetchAllCourses/:schoolId', courseController.apiFetchCourses);
 router.post('/addCourse/:schoolId', middlewareObj.validateCoursePost, courseController.apiAddCourse);

@@ -1,11 +1,11 @@
 const adminServices = require('../services/adminService'),
-    middleware = require('../middlewares/index'),
+    middleware = require('../middlewares/validation'),
     bcrypt = require('bcryptjs'),
     jwt = require('jsonwebtoken');
 
 adminCtrl = {};
 
-adminCtrl.apiAdminCtrl = async (req, res, next) => {
+adminCtrl.apiAdminCtrl = async (req, res) => {
     try {
         const { username, password } = req.body;
         let salt = await bcrypt.genSalt(10); //generates salt 
@@ -17,7 +17,7 @@ adminCtrl.apiAdminCtrl = async (req, res, next) => {
     }
 }
 
-adminCtrl.apiUpdateAdmin = async (req, res, next) => {
+adminCtrl.apiUpdateAdmin = async (req, res) => {
     try {
         const adminId = req.params.adminId;
         const data = req.body;
@@ -28,7 +28,7 @@ adminCtrl.apiUpdateAdmin = async (req, res, next) => {
     }
 }
 
-adminCtrl.apiDeleteAdmin = async (req, res, next) => {
+adminCtrl.apiDeleteAdmin = async (req, res) => {
     try {
         const adminId = req.params.adminId;
         const deletedAdmin = await adminServices.deleteAdmin(adminId);

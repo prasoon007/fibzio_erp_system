@@ -1,7 +1,7 @@
 const express =  require("express");
 const router = express.Router();
 const feeController = require('../controllers/fee.controller');
-const middleware = require("../middlewares");
+const middleware = require("../middlewares/validation");
 
 
 router.post('/addFees/:courseId', middleware.validateFeesPost, feeController.apiAddFees);
