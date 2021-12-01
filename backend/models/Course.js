@@ -7,19 +7,18 @@ const CourseSchema = mongoose.Schema({
     }],
     course_name: {
         type: String,
+        uppercase: true
     },
     course_code: {
         type: String,
-        unique: true
-    },
-    school_code: {
-        type: String,
+        unique: true,
+        uppercase: true
     },
     date: {
         start_date: Date,
         end_date: Date
     },
-    students_count: String,
+    students_count: Number,
     students: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'student'

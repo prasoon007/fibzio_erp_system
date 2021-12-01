@@ -1,4 +1,3 @@
-//TODO :- make course code unique in particular school
 //TODO :- add authorization middleware
 //TODO :- think about fees logic 
 //TODO :- add csv handler
@@ -10,12 +9,6 @@ const express = require('express'),
     app = express(),
     connectToMongoDb = require('./db'),
     cors = require('cors'),
-    { body, validationResult } = require('express-validator'),
-    jwt = require('jsonwebtoken'),
-    admins = require('./models/Admin'),
-    students = require('./models/Student'),
-    schools = require('./models/School'),
-    bcrypt = require('bcryptjs'),
     PaytmChecksum = require('paytmchecksum'),
     { v4: orderIdGen } = require('uuid'),
     https = require('https');

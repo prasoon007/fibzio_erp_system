@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const SchoolSchema = mongoose.Schema({
     school_name: {
         type: String,
-        unique: true,
-        required: true
+        required: true,
+        uppercase: true
     },
     username: {
         type: String,
@@ -12,7 +12,7 @@ const SchoolSchema = mongoose.Schema({
         required: true
     },
     school_code: {
-        type: String,
+        type: Number,
         unique: true,
         required: true
     },
