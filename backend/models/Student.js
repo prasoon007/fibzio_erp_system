@@ -19,8 +19,7 @@ const StudentSchema = mongoose.Schema({
         required: true,
         select: false
     },
-    authLev: Number,
-    course_code: String,
+    course_code: {type: String, required: true },
     dob: Date,
     address: [{
         type: String,
@@ -39,9 +38,16 @@ const StudentSchema = mongoose.Schema({
         reciept: [{
             type: String
         }],
-        late_fees:  Number,
-        paid: Number,
-        pending: Number
+        total_fees: Number,
+        total_pending: Number,
+        fee: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'fee'
+        },
+        addon: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'addon'
+        }]
     },
     parent: {
         fathers_name: String,

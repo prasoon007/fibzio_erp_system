@@ -1,7 +1,8 @@
-//TODO :- add authorization middleware
+//TODO :- add authorization middleware -->>>>>> DONE ->>>>> Still some work is pending
 //TODO :- think about fees logic 
 //TODO :- add csv handler
 //TODO :- add invoice generator
+//TODO :- discuss about authorization with harsh
 
 const express = require('express'),
     app = express(),
