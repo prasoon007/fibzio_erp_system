@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const StudentSchema = mongoose.Schema({
     roll_number: {
-        type: Number, 
+        type: Number,
         required: true,
         unique: true
-    }, 
+    },
     name: {
         type: String,
         required: true
@@ -13,13 +13,16 @@ const StudentSchema = mongoose.Schema({
     email: {
         type: String,
         unique: true
-    }, 
+    },
     password: {
         type: String,
         required: true,
         select: false
     },
-    course_code: {type: String, required: true },
+    course_code: {
+        type: String,
+        required: true,
+    },
     dob: Date,
     address: [{
         type: String,
