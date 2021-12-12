@@ -4,16 +4,26 @@
 //TODO :- add invoice generator
 //TODO :- discuss about authorization with harsh
 
+const courseCtrl = require('./controllers/course.controller');
+
 const express = require('express'),
     app = express(),
     connectToMongoDb = require('./db'),
     cors = require('cors'),
     PaytmChecksum = require('paytmchecksum'),
     { v4: orderIdGen } = require('uuid'),
-    https = require('https');
+    https = require('https'),
+    multer = require('multer'),
+    csv = require('fast-csv'),
+    fs = require('fs'),
+    course = require('./models/Course'),
+    student = require('./models/Student');
 
 //setting .env file
 require('dotenv').config();
+
+//directory setup
+global.__basedir = __dirname;
 
 //Setting up initials
 connectToMongoDb();
@@ -21,8 +31,27 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ extended: false }));
 
+//*Multer Setup
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, __basedir + '/uploads/')
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.filename + "-" + Date.now() + "-" + file.originalname)
+    }
+})
 
-//ROUTES REGISTRATION
+
+//?csv filter layer
+const csvFilter = (req, file, cb) => {
+    file.mimetype.includes('csv') ? cb(null, true) :
+        cb('Please upload csv file', false);
+}
+
+const upload = multer({ storage: storage, fileFilter: csvFilter });
+
+
+//*ROUTES REGISTRATION
 app.use('/', require('./routes/FeeRoutes'));
 app.use('/', require('./routes/AdminRoutes'));
 app.use('/', require('./routes/SchoolRoutes'));
@@ -130,6 +159,52 @@ app.post('/paymentResponse', (req, res, next) => {
         console.log("Checksum Mismatched");
     }
 });
+
+
+//CSV uploader route
+app.post('/:courseId/csvUploader', upload.single('stCsv'), (req, res) => {
+    try {
+        if (req.file == undefined) return res.status(400).send({
+            message: "Please upload a CSV"
+        })
+        let csvData = [];
+        let filePath = __basedir + '/uploads/' + req.file.filename;
+        fs.createReadStream(filePath)
+            .pipe(csv.parse({ headers: true }))
+            .on('error', (error) => {
+                throw error.message;
+            })
+            .on('data', (row) => {
+                csvData.push(row)
+            })
+            .on('end', async () => {
+                try {
+                    const foundCourse = await course.findById(req.params.courseId);
+                    if (!foundCourse) return res.status(401).send({ message: "Course Not Found" });
+                    csvData.map((data) => {data.course_code = foundCourse.course_code})
+                    student.insertMany(csvData, (err, docs) => {
+                        if(err)return console.error(err)
+                        else{
+                            docs.map((doc) => {
+                                foundCourse.students.push(doc);
+                            })
+                        }
+                    })
+                } catch (error) {
+                    res.status(500).send({
+                        message: "Csv upload failed",
+                        error: error.message
+                    })
+                }
+            })
+    } catch (error) {
+        res.status(500).send({
+            message: "Csv upload failed",
+            error: error.message
+        })
+    }
+})
+
 
 //Server Start
 app.listen(5000, () => {

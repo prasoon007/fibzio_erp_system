@@ -28,6 +28,7 @@ studentService.addStudent = async (courseId, data) => {
     try {
         const foundCourse = await courses.findById(courseId);
         if (!foundCourse) return console.log("Course search error");
+        data.course_code = foundCourse.course_code;
         const addedStudent = await students.create(data);
         if (!addedStudent) return console.log('Student create error');
         addedStudent.course_id = courseId;

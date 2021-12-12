@@ -21,7 +21,7 @@ const StudentSchema = mongoose.Schema({
     },
     course_code: {
         type: String,
-        required: true,
+        required: true
     },
     dob: Date,
     address: [{

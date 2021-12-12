@@ -74,7 +74,7 @@ middleware.validateSchoolPost = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         } next();
-        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        // if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
         next();
     }
 ]
@@ -104,9 +104,8 @@ middleware.validateCoursePost = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         }
-        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        // if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
         next();
-
     }
 ];
 
@@ -130,21 +129,20 @@ middleware.validateStudentPost = [
     body('name', 'Name required').trim().not().isEmpty(),
     body('email', 'Enter valid email').trim().not().isEmpty().isEmail(),
     body('password', 'Strong password required').trim().not().isEmpty().isStrongPassword(),
-    body('course_code', 'Required and should be numeric').trim().not().isEmpty().isNumeric(),
     body('dob', 'Must be in date format').trim().not().isEmpty().isDate(),
-    body('address', 'Required').trim().not().isEmpty(),
-    body('phone_number', 'Enter a valid phone number').trim().not().isEmpty().isMobilePhone(),
+    body('address.*', 'Required').trim().not().isEmpty(),
+    body('phone_number.*', 'Enter a valid phone number').trim().not().isEmpty().isMobilePhone(),
     body('student_status', 'Student status required').default('Regular'),
     body('parent.fathers_name', 'Fathers name required').trim().not().isEmpty(),
     body('parent.mothers_name', 'Mothers name equired').trim().not().isEmpty(),
-    body('parent.mob_number', 'Enter a valid phone number').trim().not().isEmpty().isMobilePhone(),
+    body('parent.mob_number.*', 'Enter a valid phone number').trim().not().isEmpty().isMobilePhone(),
 
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         }
-        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        // if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
         next();
     }
 ]

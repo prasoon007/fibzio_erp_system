@@ -19,6 +19,7 @@ courseService.addCourse = async (schoolId, data) => {
         const foundSchool = await schools.findById(schoolId);
         if (!foundSchool) return console.log("School search error");
         const c_id = String(data.course_name + foundSchool.school_code); //*Automatically generating course code
+        data.course_code = c_id;
         const addedCourse = await courses.create(data);
         if (!addedCourse) return console.log("Course create error");
         addedCourse.school_id = schoolId;
