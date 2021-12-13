@@ -189,9 +189,10 @@ app.post('/:courseId/csvUploader', upload.single('stCsv'), (req, res) => {
                             docs.map((doc) => {
                                 foundCourse.students.push(doc);
                             })
+                            foundCourse.save();
+                            res.status(200).send("CSV Uploaded successFully");
                         }
                     })
-                    console.log(csvData);
                 } catch (error) {
                     res.status(500).send({
                         message: "Csv upload failed",
