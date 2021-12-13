@@ -1,10 +1,7 @@
 //TODO :- add authorization middleware -->>>>>> DONE ->>>>> Still some work is pending
 //TODO :- think about fees logic 
-//TODO :- add csv handler
-//TODO :- add invoice generator
+//TODO :- add invoice generator <-----frontened pending----->
 //TODO :- discuss about authorization with harsh
-
-const courseCtrl = require('./controllers/course.controller');
 
 const express = require('express'),
     app = express(),
@@ -161,7 +158,7 @@ app.post('/paymentResponse', (req, res, next) => {
 });
 
 
-//CSV uploader route
+//*CSV uploader route
 app.post('/:courseId/csvUploader', upload.single('stCsv'), (req, res) => {
     try {
         if (req.file == undefined) return res.status(400).send({
@@ -181,15 +178,20 @@ app.post('/:courseId/csvUploader', upload.single('stCsv'), (req, res) => {
                 try {
                     const foundCourse = await course.findById(req.params.courseId);
                     if (!foundCourse) return res.status(401).send({ message: "Course Not Found" });
-                    csvData.map((data) => {data.course_code = foundCourse.course_code})
+                    csvData.map((data) => {
+                        data.address = JSON.parse(data.address);
+                        data.phone_number = JSON.parse(data.phone_number);
+                        data.course_code = foundCourse.course_code;
+                    })
                     student.insertMany(csvData, (err, docs) => {
-                        if(err)return console.error(err)
-                        else{
+                        if (err) return console.error(err)
+                        else {
                             docs.map((doc) => {
                                 foundCourse.students.push(doc);
                             })
                         }
                     })
+                    console.log(csvData);
                 } catch (error) {
                     res.status(500).send({
                         message: "Csv upload failed",

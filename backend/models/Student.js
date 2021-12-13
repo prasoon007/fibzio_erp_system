@@ -55,10 +55,10 @@ const StudentSchema = mongoose.Schema({
     parent: {
         fathers_name: String,
         mothers_name: String,
-        mob_number: [{
+        mob_number: {
             type: Number,
             unique: true
-        }]
+        }
     }
 })
 

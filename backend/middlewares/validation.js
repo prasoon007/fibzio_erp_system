@@ -75,7 +75,6 @@ middleware.validateSchoolPost = [
             return res.status(400).json({ success: false, errors: errors.array() });
         } next();
         // if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
-        next();
     }
 ]
 
