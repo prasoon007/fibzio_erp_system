@@ -37,19 +37,15 @@ const StudentSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    fee_status: {
+    fees_status: {
         reciept: [{
             type: String
         }],
-        total_fees: Number,
-        total_pending: Number,
-        fee: {
+        pending: Number,
+        charge: Number,
+        fee: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'fee'
-        },
-        addon: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'addon'
         }]
     },
     parent: {

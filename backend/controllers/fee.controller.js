@@ -2,7 +2,7 @@ const feeServices = require('../services/feeService');
 
 const feeCtrl = {};
 
-feeCtrl.apiAddFees = async (req, res, next) => {
+feeCtrl.apiAddFees = async (req, res) => {
     try {
         const courseId = req.params.courseId;
         const data = req.body;
@@ -15,7 +15,7 @@ feeCtrl.apiAddFees = async (req, res, next) => {
 }
 
 
-feeCtrl.apiUpdateFees = async (req, res, next) => {
+feeCtrl.apiUpdateFees = async (req, res) => {
     try {
         const feeId = req.params.feeId;
         const data = req.body;
@@ -28,12 +28,47 @@ feeCtrl.apiUpdateFees = async (req, res, next) => {
 }
 
 
-feeCtrl.apiDeleteFees = async (req, res, next) => {
+feeCtrl.apiDeleteFees = async (req, res) => {
     try {
         const courseId = req.params.courseId;
         const feeId = req.params.feeid;
-        const deletedFees = await feeServices.deleteFees(courseId.feeid);
-        if (!deletedFees) res.status(404).send('Fee Deletion Failed');
+        const deletedFees = await feeServices.deleteFees(courseId, feeId);
+        if (!deletedFees) res.status(404).send('Adding Fees Failed(SS)');
+        res.send(deletedFees);
+    } catch (error) {
+        res.status(500).send('some error occured,' + error.message);
+    }
+}
+
+feeCtrl.apiAddFeesViaStudent = async (req, res) => {
+    try {
+        const data = req.body;
+        const studentId = req.params.studentId;
+        const addedFees = await feeServices.addFees_SS(studentId, data)
+        if (!addedFees) res.status(404).send('Adding Fees Failed(SS)');
+        res.send(addedFees);
+    } catch (error) {
+        res.status(500).send('some error occured,' + error.message);
+    }
+}
+
+feeCtrl.apiUpdateFeesViaStudent = async () => {
+    try {
+        const data = req.body;
+        const studentId = req.params.studentId;
+        const updatedFees = await feeServices.updateFees_SS(studentId, data)
+        if (!updatedFees) res.status(404).send('Fee Update Failed(SS)');
+        res.send(updatedFees);
+    } catch (error) {
+        res.status(500).send('some error occured,' + error.message);
+    }
+}
+
+feeCtrl.apiDeleteFeesViaStudent = async () => {
+    try {
+        const studentId = req.params.studentId;
+        const deletedFees = await feeServices.deleteFees_SS(studentId)
+        if (!deletedFees) res.status(404).send('Fee Deletetion Failed(SS)');
         res.send(deletedFees);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
