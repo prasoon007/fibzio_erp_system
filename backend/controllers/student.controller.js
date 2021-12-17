@@ -1,5 +1,6 @@
 const studentServices = require('../services/studentService');
 const bcrypt = require('bcryptjs');
+const course = require('../models/Course');
 
 const studentCtrl = {};
 
@@ -7,7 +8,10 @@ studentCtrl.fetchStudent_rr = async (req, res, next) => {
     try {
         const studentId = req.params.studentId;
         const fetchedStudent = await studentCtrl.fetchStudent_rr(studentId);
-        !fetchedStudent ? res.status(404).send('Student fetch error') : res.send(fetchedStudent);
+        //TODO :- Exception Code(giving fees details when fetching through roll number)
+        const fetchedCourse = await course.find(fetchedStudent.course_code).populate(fee);
+        !fetchedStudent ? res.status(404).send('Student fetch error') : res.send(fetchedStudent, fetchedCourse);
+        //TODO :- Excpetion code ends here (Code will be refactored later)
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
