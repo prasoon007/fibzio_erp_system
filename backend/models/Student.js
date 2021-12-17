@@ -43,9 +43,9 @@ const StudentSchema = mongoose.Schema({
         }],
         pending: Number,
         charge: Number,
-        fee: [{
+        addon: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'fee'
+            ref: 'addon'
         }]
     },
     parent: {

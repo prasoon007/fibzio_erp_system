@@ -40,36 +40,37 @@ feeCtrl.apiDeleteFees = async (req, res) => {
     }
 }
 
-feeCtrl.apiAddFeesViaStudent = async (req, res) => {
+feeCtrl.apiAddAddon = async (req, res) => {
     try {
         const data = req.body;
         const studentId = req.params.studentId;
-        const addedFees = await feeServices.addFees_SS(studentId, data)
-        if (!addedFees) res.status(404).send('Adding Fees Failed(SS)');
-        res.send(addedFees);
+        const addedAddon = await feeServices.addAddon(studentId, data)
+        if (!addedAddon) res.status(404).send('Adding Fees Failed(SS)');
+        res.send(addedAddon);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
 }
 
-feeCtrl.apiUpdateFeesViaStudent = async () => {
+feeCtrl.apiUpdateAddon= async () => {
     try {
         const data = req.body;
-        const studentId = req.params.studentId;
-        const updatedFees = await feeServices.updateFees_SS(studentId, data)
-        if (!updatedFees) res.status(404).send('Fee Update Failed(SS)');
-        res.send(updatedFees);
+        const addonId = req.params.addonId;
+        const updatedAddon = await feeServices.updateFees_SS(addonId, data)
+        if (!updatedAddon) res.status(404).send('Fee Update Failed(SS)');
+        res.send(updatedAddon);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }
 }
 
-feeCtrl.apiDeleteFeesViaStudent = async () => {
+feeCtrl.apiDeleteAddon = async () => {
     try {
         const studentId = req.params.studentId;
-        const deletedFees = await feeServices.deleteFees_SS(studentId)
-        if (!deletedFees) res.status(404).send('Fee Deletetion Failed(SS)');
-        res.send(deletedFees);
+        const addonId = req.params.addonId;
+        const deletedAddon = await feeServices.deleteAddon(studentId, addonId)
+        if (!deletedAddon) res.status(404).send('Fee Deletetion Failed(SS)');
+        res.send(deletedAddon);
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }

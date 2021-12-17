@@ -1,8 +1,12 @@
 const fees = require('../models/Fee'),
     courses = require('../models/Course'),
-    student = require('../models/Student');
+    student = require('../models/Student'),
+    addon = require('../models/Addon');
 
 const feeService = {};
+
+//TODO:- Fetch Course fee through course_code when student_RR api is hit
+//TODO:- Add addon add and delete route
 
 feeService.addFees = async (courseId, data) => {
     try {
@@ -37,33 +41,33 @@ feeService.deleteFees = async (courseId, feeId) => {
     }
 }
 
-feeService.addFees_SS = async (studentId, data) => {
+feeService.addAddon = async (studentId, data) => {
     try {
         const foundStudent = await student.findById(studentId);
-        const addedFees = await fees.create(data);
-        foundStudent.fee_status.fee.push(addedFees);
+        const addedAddon = await addon.create(data);
+        foundStudent.fee_status.addon.push(addedFees);
         foundStudent.save();
-        return addedFees;
+        return addedAddon;
     } catch (error) {
-        console.log(`Fee delete error: ${error}`);
+        console.log(`Fee Addition error: ${error}`);
     }
 }
 
-feeService.updateFees_SS = async (feeId, data) => {
+feeService.updateAddon = async (addonId, data) => {
     try {
-        const updatedFees = await fees.findByIdAndUpdate(feeId, data, { new: true });
-        if (!updatedFees) return console.log('Could not update fee');
-        return updatedFees;
+        const updatedAddon = await addon.findByIdAndUpdate(addonId, data, { new: true });
+        if (!updatedAddon) return console.log('Could not update fee');
+        return updatedAddon;
     } catch (error) {
-        console.log(`Fee delete error: ${error}`);
+        console.log(`Fee Update error: ${error}`);
     }
 }
 
-feeService.deleteFees_SS = async (studentId, feeId) => {
+feeService.deleteAddon = async (studentId, addonId) => {
     try {
-        const deletedFees = await fees.findByIdAndDelete(feeId);
+        const deletedAddon = await addon.findByIdAndDelete(addonId);
         const updatedStudent = await student.findByIdAndUpdate(studentId, { pull: { fee: feeId } }, { new: true });
-        return deletedFees;
+        return deletedAddon;
     } catch (error) {
         console.log(`Fee delete error: ${error}`);
     }
