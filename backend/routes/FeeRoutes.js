@@ -3,7 +3,6 @@ const router = express.Router();
 const feeController = require('../controllers/fee.controller');
 const middleware = require("../middlewares/validation");
 
-
 router.post('/addFees/:courseId', middleware.validateFeesPost, feeController.apiAddFees);
 router.post('/addAddon/:studentId', feeController.apiAddAddon);
 router.put('/updatedFees/:feeId', middleware.validateFeesPut, feeController.apiUpdateFees);

@@ -5,13 +5,21 @@ const adminServices = require('../services/adminService'),
 
 adminCtrl = {};
 
-adminCtrl.apiAdminCtrl = async (req, res) => {
+adminCtrl.apiCreateAdmin = async (req, res) => {
     try {
         const { username, password } = req.body;
         let salt = await bcrypt.genSalt(10); //generates salt 
         const secPass = await bcrypt.hash(password, salt); //generates hashed password
         let addedAdmin = await adminServices.createAdmin(username, secPass);
-        (!addedAdmin) ? res.send(404).send('Admin creation error'):res.send({addedAdmin});
+        if(!addedAdmin) res.send(404).send('Admin creation error');
+        const data = {
+            user: {
+                id: addedAdmin.id,
+                authLev: 0
+            }
+        }
+        let authToken = jwt.sign(data, process.env.JWT_SECRET);
+        res.json({ success: true, authToken });
     } catch (error) {
         res.status(500).send('some error occured,' + error.message);
     }

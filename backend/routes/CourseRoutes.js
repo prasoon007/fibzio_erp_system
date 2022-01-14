@@ -8,5 +8,4 @@ router.post('/addCourse/:schoolId', middlewareObj.validateCoursePost, courseCont
 router.put('/updateCourse/:courseId', middlewareObj.validateCoursePut, courseController.apiUpdateCourse);
 router.delete('/deleteCourse/:schoolId/:courseId', courseController.apiDeleteCourse);
 
-
 module.exports = router;

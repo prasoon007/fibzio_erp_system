@@ -23,17 +23,15 @@ middleware.fetchUser = async (req, res, next) => {
         return res.status(401).json({ "error2": "Please Enter a valid token" });
     }
 }
+
 middleware.validateAdminPostSchoolAuth = [
     body('username', 'Min length is 8').trim().not().isEmpty().isLength({ min: 8 }),
     body('password', 'Strong password required').trim().not().isEmpty().isStrongPassword(),
-    body('authLev', 'Requirement error').trim().not().isEmpty(),
     (req, res, next) => {
         //TODO Need your attendtion sir
         const errors = validationResult(req);
         if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
-        if (!(req.user.authLev == 0 || req.user.authLev == 1)) res.status(401).send('Unauthorized Operation')
         next();
-
     }
 ];
 
@@ -74,7 +72,7 @@ middleware.validateSchoolPost = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         } next();
-        // if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        if (!(req.user.authLev == 0 || req.user.authLev == 1)) return res.status(401).send('Unauthorized Operation');
     }
 ]
 
@@ -103,7 +101,7 @@ middleware.validateCoursePost = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         }
-        // if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
         next();
     }
 ];
@@ -141,7 +139,7 @@ middleware.validateStudentPost = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         }
-        // if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
         next();
     }
 ]

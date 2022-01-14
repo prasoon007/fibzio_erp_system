@@ -4,18 +4,25 @@ const admins = require('../models/Admin'),
     parents = require('../models/Student');
 const authService = {};
 
-authService.authAdminSchoolLogin = async (username, authLev) => {
+authService.authAdminLogin = async (username) => {
     try {
-        if(authLev == 0) return await admins.findOne({username}).select('+password');
-        else if(authLev == 1) return await schools.findOne({username}).select('+password');
+        return await admins.findOne({ username }).select('+password');
     } catch (error) {
         console.log(`AS login error: ${error}`);
     }
 }
 
-authService.authStudentParentLogin = async(email) => {
+authService.authSchoolLogin = async (username) => {
     try {
-        return await students.findOne({email}).select('+password');
+        return await schools.findOne({ username }).select('+password');
+    } catch (error) {
+        console.log(`AS login error: ${error}`);
+    }
+}
+
+authService.authStudentParentLogin = async (email) => {
+    try {
+        return await students.findOne({ email }).select('+password');
     } catch (error) {
         console.log(`SP login error: ${error}`);
     }

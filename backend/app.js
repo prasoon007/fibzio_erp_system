@@ -1,7 +1,10 @@
 //TODO :- add authorization middleware -->>>>>> DONE ->>>>> Still some work is pending
 //TODO :- think about fees logic 
-//TODO :- add invoice generator <-----frontened pending----->
 //TODO :- discuss about authorization with harsh
+//TODO :- Think About Fees Logic
+//TODO :- Roll_Number Generation
+//TODO :- Late Fees Updater
+//TODO :- Instamojo and razor pay adder
 
 const express = require('express'),
     app = express(),
@@ -14,6 +17,7 @@ const express = require('express'),
     csv = require('fast-csv'),
     fs = require('fs'),
     course = require('./models/Course'),
+    Insta = require('instamojo-nodejs'),
     student = require('./models/Student');
 
 //setting .env file
@@ -84,7 +88,7 @@ app.post('/paymentGateway/payTm', (req, res) => {
 });
 
 //! paytm ka response idhar ata h bhai
-app.post('/paymentResponse', (req, res, next) => {
+app.post('/paytmPaymentResponse', (req, res, next) => {
     let body = {
         ORDERID: req.body.ORDERID,
         MID: req.body.MID,
@@ -157,6 +161,41 @@ app.post('/paymentResponse', (req, res, next) => {
     }
 });
 
+//*instamojo gateway integration
+app.post('/paymentGateway/instamojo', (req, res) => {
+    Insta.setKeys('d6bdf8b8f90dc601dd05f24856fc6058', '422744018a27c6b4fc7d9cc973691dd9');
+    const data = new Insta.PaymentData();
+    Insta.isSandboxMode(true);
+    const {purpose, amount, buyer_name, email, phone, redirect_url} = req.body;
+
+    data.purpose = purpose;
+    data.amount = amount;
+    data.currency = 'INR';
+    data.buyer_name = buyer_name;
+    data.email = email;
+    data.phone = phone;
+    data.send_sms = 'False';
+    data.send_email = 'False';
+    data.allow_repeated_payments = 'False';
+    data.webhook = "http://www.example.com/webhook/";
+    data.redirect_url = 'http://localhost:5000/instamojoPaymentResponse';
+
+    Insta.createPayment(data, function(error, response) {
+        if (error) {
+          // some error
+        } else {
+          // Payment redirection link at response.payment_request.longurl
+          const responseData = JSON.parse(response);
+          const redirect_url = responseData.payment_request.longurl;
+          console.log(redirect_url);
+        }
+      });
+});
+
+//instamojo response
+app.get('/instamojoPaymentResponse', (req, res) => {
+    res.send('hi');
+});
 
 //*CSV uploader route
 app.post('/:courseId/csvUploader', upload.single('stCsv'), (req, res) => {
