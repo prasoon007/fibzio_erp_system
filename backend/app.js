@@ -16,6 +16,7 @@ const express = require('express'),
     multer = require('multer'),
     csv = require('fast-csv'),
     fs = require('fs'),
+    Razorpay = require('razorpay'),
     course = require('./models/Course'),
     Insta = require('instamojo-nodejs'),
     student = require('./models/Student');
@@ -166,7 +167,7 @@ app.post('/paymentGateway/instamojo', (req, res) => {
     Insta.setKeys('d6bdf8b8f90dc601dd05f24856fc6058', '422744018a27c6b4fc7d9cc973691dd9');
     const data = new Insta.PaymentData();
     Insta.isSandboxMode(true);
-    const {purpose, amount, buyer_name, email, phone, redirect_url} = req.body;
+    const { purpose, amount, buyer_name, email, phone } = req.body;
 
     data.purpose = purpose;
     data.amount = amount;
@@ -180,21 +181,76 @@ app.post('/paymentGateway/instamojo', (req, res) => {
     data.webhook = "http://www.example.com/webhook/";
     data.redirect_url = 'http://localhost:5000/instamojoPaymentResponse';
 
-    Insta.createPayment(data, function(error, response) {
+    Insta.createPayment(data, function (error, response) {
         if (error) {
-          // some error
+            // some error
         } else {
-          // Payment redirection link at response.payment_request.longurl
-          const responseData = JSON.parse(response);
-          const redirect_url = responseData.payment_request.longurl;
-          console.log(redirect_url);
+            // Payment redirection link at response.payment_request.longurl
+            const responseData = JSON.parse(response);
+            const redirect_url = responseData.payment_request.longurl;
+            console.log(redirect_url);
         }
-      });
+    });
 });
 
 //instamojo response
 app.get('/instamojoPaymentResponse', (req, res) => {
     res.send('hi');
+});
+
+app.post('/razorpayPaymentGateway', (req, res) => {
+    const { amount } = req.body;
+
+    const instance = new Razorpay({
+        key_id: 'rzp_test_RkhBeNfVFky2jx',
+        key_secret: '37wzbei9Mbkf7oV9IdWddy1k',
+    });
+
+    var options = {
+        amount: amount,  // amount in the smallest currency unit
+        currency: "INR",
+        receipt: "order_1"
+    };
+    instance.orders.create(options, function (err, order) {
+        err ? console.log(err) : console.log(order);
+    });
+})
+
+//razor pay response and verification
+app.post("/success", async (req, res) => {
+    try {
+        // getting the details back from our font-end
+        const {
+            orderCreationId,
+            razorpayPaymentId,
+            razorpayOrderId,
+            razorpaySignature,
+        } = req.body;
+
+        // Creating our own digest
+        // The format should be like this:
+        // digest = hmac_sha256(orderCreationId + "|" + razorpayPaymentId, secret);
+        const shasum = crypto.createHmac("sha256", "w2lBtgmeuDUfnJVp43UpcaiT");
+
+        shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
+
+        const digest = shasum.digest("hex");
+
+        // comaparing our digest with the actual signature
+        if (digest !== razorpaySignature)
+            return res.status(400).json({ msg: "Transaction not legit!" });
+
+        // THE PAYMENT IS LEGIT & VERIFIED
+        // YOU CAN SAVE THE DETAILS IN YOUR DATABASE IF YOU WANT
+
+        res.json({
+            msg: "success",
+            orderId: razorpayOrderId,
+            paymentId: razorpayPaymentId,
+        });
+    } catch (error) {
+        res.status(500).send(error);
+    }
 });
 
 //*CSV uploader route

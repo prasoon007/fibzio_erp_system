@@ -101,7 +101,7 @@ middleware.validateCoursePost = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         }
-        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        if (!(req.user.authLev == 0 || req.user.authLev == 1)) return res.status(401).send('Unauthorized Operation');
         next();
     }
 ];
@@ -116,7 +116,7 @@ middleware.validateCoursePut = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         }
-        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        if (!(req.user.authLev == 0 || req.user.authLev == 1)) return res.status(401).send('Unauthorized Operation');
         next();
     }
 ];
@@ -139,7 +139,7 @@ middleware.validateStudentPost = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         }
-        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        if (!(req.user.authLev == 0 || req.user.authLev == 1)) return res.status(401).send('Unauthorized Operation');
         next();
     }
 ]
@@ -159,7 +159,7 @@ middleware.validateStudentPut = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         }
-        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        if (!(req.user.authLev == 0 || req.user.authLev == 1)) return res.status(401).send('Unauthorized Operation');
         next();
     }
 ]
@@ -178,7 +178,7 @@ middleware.validateFeesPost = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         }
-        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        if (!(req.user.authLev == 0 || req.user.authLev == 1)) return res.status(401).send('Unauthorized Operation');
         next();
     }
 ]
@@ -195,7 +195,7 @@ middleware.validateFeesPut = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ success: false, errors: errors.array() });
         }
-        if (req.user.authLev == 0 || req.user.authLev == 1) return res.status(401).send('Unauthorized Operation');
+        if (!(req.user.authLev == 0 || req.user.authLev == 1)) return res.status(401).send('Unauthorized Operation');
         next();
     }
 ]

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const StudentSchema = mongoose.Schema({
-    roll_number: {
+    student_id: {
         type: Number,
         required: true,
         unique: true
